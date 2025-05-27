@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>DIG App</title>
+	<meta name="description" content="DIG">
+	<meta name="author" content="tayfusion">
+	<meta name="theme-color" content="#372F28">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:image" content="icons/icon-512.png?d=42386">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="date=no">
+    <meta name="format-detection" content="address=no">
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet" href="css/themes/dig.css" />
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
+	<link rel="stylesheet" href="js/jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.css" /> 
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnFhQbgblVejauHLMXE5HxeHwDAdiCGhU&libraries=drawing,geometry&callback=gmNoop&loading=async"></script>
+	<link rel="manifest" href="digapp.webmanifest">
+
+</head>
+<body>
+	
+
+	
+<style>
+.canvasxxx {
+	background-color: #ccc;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 888;
+}
+#player {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+}
+.cam_controls{
+	position: absolute;
+	bottom: 20px;
+	z-index: 999;
+	width: 100%;
+	text-align: center;
+	margin: auto;
+}	
+	
+.cam_controls button{
+	width: auto;
+	display: inline-block;
+}
+	
+
+</style>
+<!--<select id="camlist"><option></option></select> crossorigin="use-credentials"-->		
+
+	
+	
+<div id="cameraview" style="position: absolute; height: 100%; width: 100%; background: #333; z-index: 2000; display: none">
+	<video id="player" autoplay width="100%" height="100%"></video>	
+	<div class="cam_controls" id="cam_controls_div"><button style="padding: 1em 2em 1em 2.2em;" class="ui-page-theme-a ui-btn ui-icon-cancel ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue" name="captureClose" id="captureClose">Cancel</button><button style="padding: 1em 2em 1em 2.2em;" class="ui-page-theme-a ui-btn ui-icon-refresh ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline mr-2 ml-2" name="setcam" id="setcam">Swap</button><button style="padding: 1em 2em 1em 2.2em;" class="ui-page-theme-a ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red" name="captureButton" id="captureButton">Capture</button></div>
+
+	<div id="cam_preview">
+        <img src="img/ico_inspec.png" alt="confirm image" style="width: 100%; height: auto; padding-top:30%;" id="cam_preview_img">
+        <div class="cam_controls"><button style="padding: 1em 2em 1em 2.2em; float: left; margin-left: 10%;" class="ui-page-theme-a ui-btn ui-icon-cancel ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red" name="killClose" id="killClose">Delete</button><button style="padding: 1em 2em 1em 2.2em; float: right; margin-right: 10%;" class="ui-page-theme-a ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_green" name="keepPhotoClose" id="keepPhotoClose">Confirm</button></div>
+    </div>
+    <div id="cam_canvas"><canvas id="canvas" width="300" height="300"></canvas></div>
+</div>	
+
+	
+	
+	
+	
+	
+
+
+<div id="loadbox">
+<div id="ajaxLoadingBox"><div class="ui-overlay-a ui-overlay-shadow ui-corner-all p-4 ac"><img alt="dig logo" src="img/logo_digdata.png" style="width:100px; padding:5px"><h3 id="loaderh3">SYNCING</h3></div></div>
+</div>
+
+
+<div data-role="footer" id="footer">	
+	<a id="back_but" onclick="back_clicked();"></a>
+	<div id="crop_edit_foot"><a class="foot_icon home" onclick="backhome(1);">Home</a><a class="foot_icon inspect" onclick="load_inspect_crop();">Inspect</a><a class="foot_icon testdig"  onclick="load_test_dig();">Test Dig</a><a class="foot_icon boxcount" onclick="load_box_count();">Box Count</a></div>
+</div>
+	
+<!-- **MAIN** data-tap-toggle="false" <a class="foot_icon dress active" onclick="load_dress();">Dress Report</a>-->
+<div data-role="page" id="page_index" style="background: #343738;">
+		<!-- **MAIN** -->
+		<!-- INDEX -->
+		<div data-role="content">
+			<div class="p-10">
+				<div class="ac"><img class="logo" src="img/logo_digdata.png" style="max-width: 200px; padding: 10px 0 10px 0" alt="logo"></div>
+				<div class="form_container ac" id="auth_form" style="display: none">
+					<h1 class="page_crop_head_h1">Connect to a Merchant</h1>
+					<div class="mb-3 logdivhide">
+						<input type="text" name="my_dig_url" id="my_dig_url" value="" style="text-transform: uppercase;" placeholder="DIG URL e.g: dig.the-website.com">
+					</div>
+					<div class="mb-3 logdivhide">
+						<input type="text" name="my_email" id="my_email" value="" style="text-transform: uppercase;" placeholder="Your Email Address">
+					</div>
+					
+					<div class="mb-3 logdivshow" style="display: none">
+						<div class="mb-3 warnbox green mt-3">We have sent you an access key by text, please enter it here:</div>
+						<input type="text" name="my_access_key" id="my_access_key" value="" style="text-transform: uppercase;" placeholder="DIG Access Key">
+					</div>
+					<div>
+						<button id="go_check_key" name="go_check_key" onclick="go_check_key()" style="border-color: #2E2822; padding: 1em 1em!important;">Register</button>
+					</div>		
+				</div>
+				
+				<div id="welome_div" class="mb-3 mt-3 ac" style="display: none">
+				Welcome to DIG. We hope this App is a great tool for you, if you need any support, contact the DIG team.
+				</div>
+
+
+				<div id="select_merchant_div" class="mb-3 mt-4 ac" style="display: none">
+				<h2>Your DIG Merchants</h2>
+				<div id="select_merchant_rows">
+					<div class="mb-2"><a class="h2" onclick="select_existing(0,'?')">Merchant Name ?</a></div>	
+				</div>
+				</div>
+				
+				<div id="status_bot">...</div>
+				
+			</div>
+				
+		</div>
+
+	<!-- **MAIN**<div class="input-section">
+				<button id="location-btn" type="button" onClick="getLocation();">Get Location</button><button id="notifications">Dummy notifications</button>
+			</div> <a href="spec.html">S</a>-->
+</div>
+	<!-- **MAIN** -->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+<div data-role="page" id="page_crops">
+
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="swap_my_access();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Dig App Home</h1>
+		</div>
+		<div data-role="content">
+	
+	
+			
+			<div class="p-10 pt-2 pb-1" id="searchboxdiv" style="display: none;">
+				<fieldset class="ui-grid-a" style="box-sizing: border-box;">
+					<div class="ui-block-a" style="width:82%">
+					<input class="ui-input-text" type="text" name="crop_search_str" id="crop_search_str" value="" placeholder="Search: Crop #, Variety, Grower">
+					</div>
+					<div class="ui-block-b ar" style="width:18%">
+					<button onClick="reset_active_crops_then_load();" data-inline="true" id="search_crops_but" style="width: 90%;" name="search_crops_but">Go</button>
+					</div>
+				</fieldset>				
+			</div>	
+
+			<div id="syncmess" class="white mx-5 mb-2 bold rounded" style="display: none;">
+                <div class="pr-5 nofold" style="display: inline-block; vertical-align: middle"><select name="get_crop_ns" id="get_crop_ns"><option value="0">This Season</option><option value="1">Next Season</option></select></div>
+                <a onClick="get_crop_data();" class="ui-btn ui-icon-refresh ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline">Get Crops</a>                
+                <a onClick="do_the_sync();" class="ui-btn ui-icon-navigation ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red fr">Sync</a>
+            </div>
+            
+            
+			<div class="warnbox" id="conbad" style="display: none"><strong>No connection.</strong> Remember to Sync later.</div>
+			
+			
+		
+			
+            <div id="concust_list_box" class="mx-5 mb-2" style="display: none;">
+                <div><h1 id="openclosewc" class="mb-0 mt-3 pl-10 py-5 white overlaybg rounded" style="display: none; background: #665e6d; font-size:1.8em!important;">Contract <span style="color: #a79ab5">Customers</span></h1></div>
+                <div id="concust_list_table" class="pl-1 pr-5" style="display: none;"></div>
+                <div style="margin:10px auto 2px auto;" class="ac"><span class="fbox widder bgc_1">Planned</span><span class="fbox widder bgc_2">Confirmed</span><span class="fbox widder bgc_3">Signed</span></div>
+			</div>
+            
+			<div id="dress_list_box" class="mx-5 mb-2" style="display: none;">
+                <div><h1 id="openclosedrs" class="mb-1 mt-1 pl-10 py-5 white overlaybg rounded" style="display: none; background: #527454; font-size:1.8em!important;">Gradings <span style="color: #bac1ba">&amp; Despatches</span></h1></div>
+                <div id="dress_list_table" class="pl-1 pr-5" style="display: none;">			
+                </div>
+			</div>
+            
+            <div id="passport_list_box" class="mx-5 mb-2" style="display: none;">
+                <div><h1 id="openclosepp" class="mb-0 mt-1 pl-10 py-5 white overlaybg rounded" style="display: none; background: #526774; font-size:1.8em!important;">Passport <span style="color: #bac1ba">Collection Reports</span></h1></div>
+                <div id="passport_list_table" class="pl-1 pr-5" style="display: none;"></div>
+			</div>
+			
+			<div id="crop_list_boxg" class="mx-5 mb-2">
+                <div><h1 id="openclosecrpg" class="mb-1 mt-1 pl-10 py-5 white overlaybg rounded" style="display: none; font-size:1.8em!important;">Crops <span style="color: #91917f">by Grower</span></h1></div>
+				<div id="crop_list_tableg" class="pl-1 pr-5" style="display: none;">			
+				</div>
+			</div>
+            
+            <div id="crop_list_boxv" class="mx-5 mb-2">
+                <div><h1 id="openclosecrpv" class="mb-1 mt-1 pl-10 py-5 white overlaybg rounded" style="display: none; font-size:1.8em!important; background: #374346">Crops <span style="color: #5f787e">by Variety</span></h1></div>
+				<div id="crop_list_tablev" class="pl-1 pr-5" style="display: none;">			
+				</div>
+			</div>
+			
+			<div class="mb-3 mt-4 ac" id="reload_buts_box" style="display: none;">
+				<h3>Remember to sync regularly</h3>
+                <a onClick="load_box_in_form();" class="ui-btn ui-icon-grid ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Boxes In</a>
+			</div>
+            
+            
+            
+            
+            <div id="welcomex" class="p-10 a-box m-1 rounded" style="display: none;">
+				<h1 class="brown">DIG Companion App</h1>
+				<p>This is your crop screen, here you will find all the crops you have access to.</p>
+				<div class="mt-2">
+				<strong>You can:</strong>
+					<ul style="margin: 15px 0 15px 17px;">
+						<li>Preview core crops, trade crops and available yields</li>
+						<li>Review and add inspections</li>
+						<li>Add/Edit key dates and crop scores</li>
+						<li>Add Test Digs</li>
+						<li>Update Box Counts</li>
+						<li>Adjust In-store Box Splits</li>
+						<li>Complete Grading/Haulage Requests</li>
+						<li>Add Crop &amp; Docket Photos</li>
+					</ul>
+					<p>We make improvements all the time, if you have a suggestion let us know.</p>
+					
+					
+					
+				</div>
+			</div>
+            
+            
+			
+			<div class="mb-1 ac"><span class="red" id="constate"></span>&nbsp;@&nbsp;<span class="red" id="locovar"></span></div>
+		</div>
+		<!-- END -->			
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+<div data-role="page" id="page_crop_details">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="DIG logo"></a><h1 class="page_crop_head_h1">Crop Details</h1>
+		</div>
+
+		<div data-role="content">
+			<div class="p-3">
+				
+				<h1 class="pt-2 pb-0 lh14" id="cd_Var" style="font-size: 2em!important;">Variety</h1>
+                <h2 class="p-0 lh14" id="cd_GrowerFarm">Grower</h2>
+                <h4 class="dark pb-2 lh14" id="cd_Frm">Farm</h4>
+				<div class="pb-2 al" id="no_live_data"><strong class="red">Data from App. No connection.</strong></div>
+                
+                <h4 class="white p-0 lh14">Availability</h4>
+                <table id="crop_avail_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1 mb-3" border="2" bordercolor="#AAA199" cellspacing="5" cellpadding="5">	
+					<tr>
+                        <td class="td_dark ac">Seed</td>
+                        <td class="td_dark ac">Ware</td>
+                        <td class="td_dark ac">Allo (S/W)</td>
+                        <td class="td_dark ac">Disp (S/W)</td>
+                    </tr>
+                    <tr>
+                        <td class="bold ac td_green" id="ca_seed">-</td>
+                        <td class="bold ac td_brown" id="ca_ware">-</td>
+                        <td class="bold ac td_lbrown" id="ca_allo">-</td>
+                        <td class="bold ac td_lbrown" id="ca_disp">-</td>
+                    </tr>
+				</table>
+                
+				<table id="crop_details_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1" border="2" bordercolor="#AAA199" cellspacing="5" cellpadding="5">	
+                    <tr><td class="td_green">Seed (t)</td><td class="pl-1 bold" id="cd_e3555">-</td><td class="td_red">Boxes</td><td class="pl-1 bold" id="cd_BoxCount">-</td></tr>
+					<tr><td class="td_dark">Field Area</td><td class="pl-1 bold" id="cd_Quantity">-</td><td class="td_dark">All Tonnes</td><td class="pl-1 bold" id="cd_eTotal">-</td></tr>
+					<tr><td class="td_dark">Crop Rate</td><td class="pl-1 bold red" id="cd_crrate">-999</td><td class="td_dark">TD Rate</td><td class="pl-1 bold" id="cd_TestDigRating">-</td></tr>
+					<tr><td class="td_dark">Store Rate</td><td class="pl-1 bold red" id="cd_StoreRating">-999</td><td class="td_dark">Grade (Ent)</td><td class="pl-1 bold" id="cd_EntryUnionGrade">-</td></tr>
+					<tr><td class="td_dark">Grade (Att)</td><td class="pl-1 bold" id="cd_AttainedUnionGrade">-</td><td class="td_dark">Start (Tns)</td><td class="pl-1 bold" id="cd_eStartTotal">-</td></tr>
+					
+                    <tr><td colspan="4" class="p-1"></td></tr>
+					<tr><td class="td_dark" style="background: #545446!important;">Plant<span id="pdd"></span></td><td class="pl-1 bold red" id="cd_plantd">-999</td><td class="td_dark" style="background: #545446!important;">Burn<span id="bdd"></span></td><td class="pl-1 bold red" id="cd_burnd">-999</td></tr>
+					<tr><td class="td_dark" style="background: #545446!important;">Herb<span id="brd"></span></td><td class="pl-1 bold red" id="cd_herbd">-999</td><td class="td_dark" style="background: #545446!important;">Harvest<span id="hdd"></span></td><td class="pl-1 bold red" id="cd_harvestd">-999</td></tr>
+				</table>
+
+				<div class="mb-0 mt-3 ac"><a onClick="capturePhoto(2,0);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Crop Photo</a></div>
+                
+                
+
+                <h1 class="pt-2 brown mb-1" id="last_td_title">Last Test Dig</h1>
+                <div class="mb-0 pl-1">By: <strong id="ltd_by_name">???</strong> On: <span id="pbtd_date">???</span></div>
+                <table id="ltd_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+                    
+                </table>
+
+                
+
+                    <h1 class="pt-2 brown mb-1">Last Inspection</h1>
+                    <div class="mb-1 pl-1">By: <strong id="isp_by_name">???</strong></div>
+                    <table id="crop_inspections_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" cellpadding="2" cellspacing="2" border="2" bordercolor="#AAA199">	
+
+                    </table>
+           
+                
+                
+                <h1 class="pt-2 brown mb-1">Plan Notes</h1>
+                <table id="crop_inspection_notes_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+
+				</table>
+                
+                <h1 class="pt-2 brown mb-1">Crop Photos</h1>
+				<table id="crop_photos_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+					
+				</table>
+				
+				<div class="a_box rounded mt-3 mb-4">
+					<div class="form-row mt-2">	
+						<h1 class="mb-0 lh14 p-0">Update Crop Dates</h1>
+                        
+                        
+                        <div class="form-group col-md-3 col-lg-2 pt-2"><label for="the_plant_date">Plant Date</label>
+							<input type="date" class="form-control" name="the_plant_date" id="the_plant_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+						</div>
+						<div class="form-group col-md-3 col-lg-2 pt-2"><label for="the_herb_date">Herbicide Date</label>
+							<input type="date" class="form-control" name="the_herb_date" id="the_herb_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+						</div>
+						<div class="form-group col-md-3 col-lg-2 pt-1"><label for="the_burn_date">Burn Date</label>
+							<input type="date" class="form-control" name="the_burn_date" id="the_burn_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+						</div>						
+						<div class="form-group col-md-3 col-lg-2 pt-2"><label for="the_harvest_date">Harvest Date</label>
+							<input type="date" class="form-control" name="the_harvest_date" id="the_harvest_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+						</div>
+						
+						<div class="form-group col-md-3 col-lg-2 pt-2"><label for="the_crop_rating">Crop Rating [1: Excellent 5: Poor]</label>
+							<select name="the_crop_rating" id="the_crop_rating" class="form-control">
+								<option value="0">Not Set Yet...</option>
+								<option value="1.0">1</option><option value="1.5">1.5</option>
+								<option value="2.0">2</option><option value="2.5">2.5</option>
+								<option value="3.0">3</option><option value="3.5">3.5</option>
+								<option value="4.0">4</option><option value="4.5">4.5</option>
+								<option value="5.0">5</option>
+							</select>
+						</div>
+						
+						<div class="form-group col-md-3 col-lg-2 pt-2"><label for="the_store_rating">Store Rating</label>
+							<select name="the_store_rating" id="the_store_rating">
+								<option value="0">Not Set Yet...</option>
+								<option value="1.0">1</option><option value="1.5">1.5</option>
+								<option value="2.0">2</option><option value="2.5">2.5</option>
+								<option value="3.0">3</option><option value="3.5">3.5</option>
+								<option value="4.0">4</option><option value="4.5">4.5</option>
+								<option value="5.0">5</option>
+							</select>
+						</div>
+						
+					</div>
+					<div class="dts_saved_div bggreen mb-1 mt-23 p-6 ac" style="display: none">Saved. Will send to DIG at next sync</div>
+					
+                    
+                    
+                    <div class="form-row mb-0 pb-3 pl-3 pr-3 pt-2 my-3 rounded">	
+						<div class="form-group col-md-12 col-lg-12 text-center">												
+							<button id="submit_dates" class="but_red" onClick="save_the_dates();" name="submit_dates">Save Crop Dates</button>
+						</div>
+					</div>
+
+				</div>
+				
+                <div class="a_box rounded mt-3 mb-4" id="map-canvas-all">
+                    <div class="form-row mt-2 mb-3">	
+				    <h1 class="mb-1 lh14 p-0">Field Map</h1>
+                    <h3 class="white p-0" id="cd_FID">FID?</h3>    
+                    <div id="map-canvas" class="mb-4" style="height: 600px; width:100%; margin: 0px; padding: 0px"></div>
+                        
+
+                    
+                    <div id="map_form" class="text-center"> 
+                        <div class="white mb-2 h2 ac" id="map_area_val"></div>
+                        <div class="dts_saved_div bggreen mb-1 mt-23 p-6 ac" style="display: none">Saved. Will send to DIG at next sync</div>
+                        <input type="button" name="save_poly_map" value="Save Map" id="save_poly_map" onClick="save_the_dates();" />
+                        <input type="button" class="btn but_blue ml-2" name="clear" value="Clear &amp; Start Mapping" id="clear" />
+                        <input type="button" class="but_red ml-2" name="my_poss" value="My Position" id="my_poss" />
+                        
+                        
+
+
+                        
+                        <div><strong class="red" id="locovarmap"></strong></div>
+                        
+                        <input type="hidden" value="" name="vertices" id="vertices">
+                    </div>           
+
+                    </div>    
+                </div>
+				
+				
+			</div>	
+		</div>
+		<!---->
+
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+<div data-role="page" id="page_crop_inspection">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Inspecting: </h1>
+		</div>
+		
+		<div data-role="content">	
+
+			<div class="p-6">
+				<div class="form-row">	
+
+				<div class="warnbox" id="inspect_warn"><strong>This Inspection is Complete</strong><br>This will auto sync with DIG once you have a connection. You can still make updates just now.</div>
+
+					
+				<h1 style="font-size: 2em;" class="mb-2">Crop Inspection</h1>
+                    
+                    
+				<div class="mb-3 p-box2 rounded"  style="background: #5c7289;">  
+                    <div class="form-group col-md-12 col-lg-12 mb-0">
+					    <h1 class="mb-0 white">Planning Notes</h1>
+                        <p class="mb-0 white">Planning Notes can be saved independently of a full inspection.</p>
+					</div>
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2"><label for="notexdate">Plan Date <span id="notexdatex"></span></label>
+						<input type="date" class="form-control" name="notexdate" id="notexdate" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+					</div>
+                    
+                    <div class="pt-2" id="common_notes_div" style="display: none">
+                        <h3>Select a common note...</h3>
+                        <table id="common_notes_table" style="margin-top: 0px; margin-bottom: 8px;">
+                            <tr><td></td></tr>
+                        </table>
+					</div>
+                    
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2">
+                        <label for="notepdesc">Plan Note <a id="common_notes_tog_but" style="float: right; color: #fff; text-decoration: underline" data-role="none" onClick="common_notes_tog();">Open Notes</a></label>	
+					    <textarea class="form-control" name="notepdesc" style="height: 80px;" rows="16" placeholder="Plan Note" id="notepdesc"></textarea>
+					</div>
+                    
+                    <div class="form-group col-md-3 col-lg-2"><label for="note_type">Type</label>
+					<select name="note_type" id="note_type" class="form-control" style="background: #ced9e3!important;">
+						<option value="0" selected>General</option>
+                        <option value="1">Crop Protection Plan</option>
+                        <option value="2">Fertiliser Plan</option>
+                        <option value="3">Irrigation Plan</option>
+					</select>
+					</div>
+
+                    
+
+					<div class="form-group col-md-3 col-lg-2"><label for="notestate">Status</label>
+					<select name="notestate" id="notestate" class="form-control" style="background: #ced9e3!important;">
+						<option value="0" selected>Suggested</option>
+						<option value="1">Confirmed</option>
+						<option value="2">Actioned</option>
+                        <option value="3">Cancelled</option>
+                        <option value="4">Delete</option>
+					</select>
+					</div>
+
+
+					<div class="form-group col-md-12 col-lg-12 pt-2">
+					
+					</div>
+
+
+					<div class="form-group col-md-12 col-lg-12 text-center" style="margin-top: 40px;">
+                    <input type="hidden" name="note_innid" id="note_innid" value="0" />
+                    <input type="hidden" name="note_myuid" id="note_myuid" value="" />    
+					<button id="submit_inspect_notes" class="but_red" onClick="save_and_complete_inspect_notes();" name="submit_inspect_notes">Submit Inspection Note</button>
+					</div>
+
+
+
+				</div>	
+                    
+                <div class="mb-3 mt-2 ac"><a onClick="capturePhoto(2,0);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Crop Photo</a></div>
+
+                    
+<div id="inspect_form">   
+                    
+   <div class="mb-3 mt-2 ac" id="load_prev_insp_vals_div"><a id="load_prev_insp_vals" class="ui-btn ui-icon-eye ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Load Previous Inspection Values</a></div> 
+    
+
+
+    
+    	
+				<div class="mb-3 p-box2 rounded" style="background: #4f463c;">
+
+					<div class="form-group col-md-12 col-lg-12 mb-0">
+					<h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Field Topography</h1>
+                        <a id="fieldtopo_field_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>
+					</div>
+					
+    <div id="fieldtopo_field_div">
+                    <div class="form-group pt-3">
+                        <h3>We recommend you complete the field topography at first inspection</h3>
+                    </div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-1"><label for="isp_soil">Soil Type</label>
+					<select name="isp_soil" id="isp_soil" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">VERY LIGHT</option>
+						<option value="1">LIGHT</option>
+						<option value="2">LIGHT-MEDIUM</option>
+						<option value="3">MEDIUM</option>
+						<option value="4">MEDIUM-HEAVY</option>
+						<option value="5">HEAVY</option>
+						<option value="6">VERY HEAVY</option>
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_endrigs">Endrigs</label>
+					<select name="isp_endrigs" id="isp_endrigs" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">NO</option>
+						<option value="1">YES</option>
+						<option value="2">OTHER VARIETY</option>			
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_ftypo">Topography</label>
+					<select name="isp_ftypo" id="isp_ftypo" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">FLAT</option>
+						<option value="1">FAIRLY FLAT</option>
+						<option value="2">SLOPING</option>
+						<option value="3">UNDULATING</option>
+						<option value="4">BOWL</option>
+						<option value="5">UPTURNED BOWL</option>
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_hollows">Wet Hollows</label>
+					<select name="isp_hollows" id="isp_hollows" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">NO</option>
+						<option value="1">YES</option>
+						<option value="2">POSSIBLE</option>			
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_stones">Stone Content</label>
+					<select name="isp_stones" id="isp_stones" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">VERY FEW</option>
+						<option value="1">FEW</option>
+						<option value="2">AVERAGE</option>
+						<option value="3">MANY</option>
+						<option value="4">VERY MANY</option>				
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_pylons">Pylons/Poles</label>
+					<select name="isp_pylons" id="isp_pylons" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">NO</option>
+						<option value="1">YES</option>			
+					</select>
+					</div>
+
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_freedrain">Free Draining</label>
+					<select name="isp_freedrain" id="isp_freedrain" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">NO</option>
+						<option value="1">YES</option>
+						<option value="2">PARTIAL</option>			
+					</select>
+					</div>
+
+					<div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_trees">Trees/Wood</label>
+					<select name="isp_trees" id="isp_trees" class="form-control">
+						<option value="-1">Select?</option>
+						<option value="0">NO</option>
+						<option value="1">YES</option>			
+					</select>
+					</div>
+                    
+                    
+                    
+				</div>
+
+        </div>
+    
+    
+    
+    	
+            <div class="mb-3 p-box2 rounded" style="background: #3a4534;">
+
+					<div class="form-group col-md-12 col-lg-12 mb-0">
+					<h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Growth Stage</h1>
+                    <a id="growstage_field_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>    
+					</div>
+					
+            <div id="growstage_field_div">                    
+                    <div class="form-group col-md-3 col-lg-3 pt-2"><label for="GrowStage1">Growth Stage 1</label>
+                        <select name="GrowStage1" id="GrowStage1" class="form-control">
+                            <option value="0">N/A</option>
+                            <option value="1">LESS THAN 100% EMERGENCE</option>
+                            <option value="2">100% EMERGENCE</option>
+                            <option value="3">MARKING ROWS</option>
+                            <option value="4">MEETING DOWN ROWS</option>
+                            <option value="5">MEETING ACROSS ROWS</option>
+                            <option value="6">MEETING ACROSS BEDS</option>
+                            <option value="7">BUDS FORMED</option>
+                            <option value="8">IN FLOWER</option>
+                            <option value="9">IN FULL FLOWER</option>
+                            <option value="10">LUSH GREEN</option>
+                            <option value="11">STARTING TO SENESCE</option>
+                            <option value="12">PART SENESCED</option>
+                        </select>
+					</div>
+                    <div class="form-group col-md-3 col-lg-3 pt-2"><label for="GrowStage2">Growth Stage 2</label>
+                        <select name="GrowStage2" id="GrowStage2" class="form-control">
+                            <option value="0">N/A</option>
+                            <option value="1">LESS THAN 100% EMERGENCE</option>
+                            <option value="2">100% EMERGENCE</option>
+                            <option value="3">MARKING ROWS</option>
+                            <option value="4">MEETING DOWN ROWS</option>
+                            <option value="5">MEETING ACROSS ROWS</option>
+                            <option value="6">MEETING ACROSS BEDS</option>
+                            <option value="7">BUDS FORMED</option>
+                            <option value="8">IN FLOWER</option>
+                            <option value="9">IN FULL FLOWER</option>
+                            <option value="10">LUSH GREEN</option>
+                            <option value="11">STARTING TO SENESCE</option>
+                            <option value="12">PART SENESCED</option>
+                        </select>
+					</div>
+                    <div class="form-group col-md-3 col-lg-3 pt-2"><label for="StemCount">Stem Count</label>
+                        <input type="number" min="0" step="1" max="99" name="StemCount" id="StemCount" value="0" required class="form-control" autocomplete="dasdz423423" />                        
+					</div>
+    		
+        </div>
+
+        </div>
+    
+    
+    
+    
+                     
+					
+            <div class="mb-3 p-box2 rounded" style="background: #532d2e;">
+
+					<div class="form-group col-md-12 col-lg-12 mb-0">
+					<h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Instances</h1>
+                    <a id="ins_field_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>  
+					</div>
+            <div id="ins_field_div">                    
+                    <div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_passes">Commercial Passes [Crop Walk Drill Passes]</label>
+					<input type="number" min="0" step="1" max="20" name="isp_passes" id="isp_passes" value="1" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_rogues">Rogues</label>
+					<input type="number" min="0" step="0.001" name="isp_rogues" id="isp_rogues" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_gks">GK's</label>
+					<input type="number" min="0" step="0.001" name="isp_gks" id="isp_gks" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_vari">Vari's</label>
+					<input type="number" min="0" step="0.001" name="isp_vari" id="isp_vari" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_pvy">PVY/PVA/PLRV</label>
+					<input type="number" min="0" step="0.001" name="isp_pvy" id="isp_pvy" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_virus">Virus</label>
+					<input type="number" min="0" step="0.001" name="isp_virus" id="isp_virus" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_blackleg">Blackleg</label>
+					<input type="number" min="0" step="0.001" name="isp_blackleg" id="isp_blackleg" value="0" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_blight">Blight</label>
+                    <select name="isp_blight" id="isp_blight" class="form-control">
+                        <option value="-1">Select?</option>
+                        <option value="0">NIL</option>
+                        <option value="1">TRACE</option>
+                        <option value="2">SLIGHT</option>
+                        <option value="3">MODERATE</option>
+                        <option value="4">SEVERE</option>
+                    </select>
+                    </div>
+        </div>
+        </div>   
+    
+                    
+                    
+                    
+                <div class="mb-3 p-box2 rounded"  style="background: #672b2b;">
+				    <div class="form-group col-md-12 col-lg-12 mb-0">
+                    <h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Sample Defects</h1>
+                    <a id="samp_def_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>  
+					</div>
+                    <div id="samp_def_div">     
+                    <div id="live_inspect_html">
+                    
+                    </div>
+					</div>
+                </div>
+                    
+                <div class="mb-3 mt-2 ac"><a onClick="capturePhoto(2,0);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Crop Photo</a></div>
+                
+                <div class="p-box2 rounded overlaybg" style="margin-bottom: 50px;">  
+                    <div class="form-group col-md-12 col-lg-12 mb-0">
+					    <h1 class="mb-0 white">Complete Inspection</h1>
+					</div>
+                    
+                    
+                    
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_date">Inspection Date</label>
+						<input type="date" class="form-control" name="isp_date" id="isp_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" />
+					</div>
+                    
+   
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2">If all you are recording is an irrigation advisory, add the record as an Inspection Note instead.</div>
+
+					<div class="form-group col-md-3 col-lg-2"><label for="isp_score">Crop Rating [1: Excellent 5: Poor]</label>
+					<select name="isp_score" id="isp_score" class="form-control">
+						<option value="0">Select?</option>
+						<option value="1.0">1</option><option value="1.5">1.5</option>
+						<option value="2.0">2</option><option value="2.5">2.5</option>
+						<option value="3.0">3</option><option value="3.5">3.5</option>
+						<option value="4.0">4</option><option value="4.5">4.5</option>
+						<option value="5.0">5</option>
+					</select>
+					</div>
+                    
+                    <div class="form-group col-md-3 col-lg-2 pt-2"><label for="isp_waste">Grade Waste % Recommendation</label>
+					<input type="number" min="1" step="1" name="isp_waste" id="isp_waste" value="5" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+
+
+					<div class="form-group col-md-12 col-lg-12 pt-2">
+					<label for="isp_comments">Comments or other conditions</label>	
+					<textarea class="form-control" name="isp_comments" style="height: 120px !important;" rows="16" placeholder="Inspection Comments" id="isp_comments" data-autogrow="false"></textarea>
+					</div>
+					
+					
+
+					<div class="form-group col-md-12 col-lg-12 text-center" style="margin-top: 40px;">
+					<input type="hidden" value="0" name="igid" id="igid">
+					<input type="hidden" value="" name="myuid" id="myuid">
+					<input type="hidden" value="0" name="allowflysave" id="allowflysave">	
+					<button id="submit_inspection" class="but_red" onClick="save_and_complete_inspection();" name="submit_inspection">Complete &amp Submit Inspection</button>
+					</div>
+
+
+
+				</div>
+</div>     
+                    
+                    
+                    
+                    
+                    
+                
+
+			</div>
+			
+			
+			
+		</div>
+		<!---->
+
+	</div>
+</div>	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+<div data-role="page" id="page_test_dig">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Test Dig: </h1>
+		</div>
+		
+		
+		<div data-role="content" id="test_dig_form_all">
+		
+<div class="p-6">		
+<div id="pre_burn_dig_form" class="mt-1">
+<h1>Pre Burn - Dig Inspection</h1>	
+
+	<div class="orngebg p-box rounded">
+		
+		
+		<div class="peagreen pb-2" id="preburn_warn"><strong>Pre Burn Complete</strong><br>You can still make updates just now, but this will be synced later.</div>
+		
+		<table id="pre_burn_table" style="width: 100%">		
+			<tbody>
+                
+				<tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">55+</h3></td>
+					<td class="p-3"><input type="number" min="0" max="90" step="1" name="preb_t1" id="preb_t1" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Tubers"></td>
+					<td class="p-3"><input type="number" min="0" max="200" step="0.01" name="preb_w1" id="preb_w1" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="KG"></td>
+				</tr>
+				<tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">50x55</h3></td>
+					<td class="p-3"><input type="number" min="0" max="90" step="1" name="preb_t2" id="preb_t2" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Tubers"></td>
+					<td class="p-3"><input type="number" min="0" max="200" step="0.01" name="preb_w2" id="preb_w2" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="KG"></td>
+				</tr>
+				<tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">35x50</h3></td>
+					<td class="p-3"><input type="number" min="0" max="90" step="1" name="preb_t3" id="preb_t3" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Tubers"></td>
+					<td class="p-3"><input type="number" min="0" max="200" step="0.01" name="preb_w3" id="preb_w3" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="KG"></td>
+				</tr>
+				<tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">&lt;35</h3></td>
+					<td class="p-3"><input type="number" min="0" max="90" step="1" name="preb_t4" id="preb_t4" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Tubers"></td>
+					<td class="p-3"><input type="number" min="0" max="200" step="0.01" name="preb_w4" id="preb_w4" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="KG"></td>
+				</tr>
+                
+                <tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">PB Date</h3></td>
+					<td class="p-3" colspan="2"><input type="date" class="form-control" name="preb_date" id="preb_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" /></td>
+				</tr>
+                
+                
+                <tr class="trtdtrans noborder">		
+					<td class="p-3"><h3 class="mb-0 pt-1 white">Length</h3></td>
+					<td class="p-3"><h3 class="mb-0 pt-1 white">Width</h3></td>
+					<td class="p-3"><h3 class="mb-0 pt-1 white">Stems</h3></td>
+				</tr>
+                <tr class="trtdtrans noborder">		
+					<td class="p-3"><input type="number" min="0" max="6" step="0.1" name="preb_l" id="preb_l" value="1" class="form-control ac" autocomplete="dasdz423423"></td>
+					<td class="p-3"><input type="number" min="0" max="3" step="0.005" name="preb_w" id="preb_w" value="0.925" class="form-control ac" autocomplete="dasdz423423"></td>
+					<td class="p-3"><input type="number" min="0" max="200" step="1" name="preb_stems" id="preb_stems" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+				</tr>
+                
+                
+				<tr class="trtdtrans noborder">		
+					<td class="p-3" colspan="3"><textarea class="form-control" name="preb_note" style="height: auto !important; min-height: 100px; width:100%" rows="12" placeholder="Comments" id="preb_note"></textarea></td>
+				</tr>
+			</tbody>
+		</table>	
+
+		<div class="p-10 text-center">	
+			<button id="submit_preburn" class="but_red" onClick="save_and_complete_preburn();" name="submit_preburn">Submit Pre-Burn Inspection</button>
+		</div>	
+	</div>
+	
+</div>		
+		
+		
+<div class="mt-3 ac">
+<a onClick="capturePhoto(3,0);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Dig Photo</a>			
+</div>		
+		
+		
+		
+		
+<div id="test_dig_form" class="mt-3">	
+<h1>Full Test Dig</h1>	
+	
+	
+	
+	
+	
+	
+			
+<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
+<table class="BALTable" style="width:96%;">
+  <tbody>
+    <tr>
+      <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 1 (required)</h1></td>
+    </tr>
+	  
+	<tr>
+      <td></td>
+      <td class="table_col_head">Tuber #</td>
+      <td class="table_col_head">Tuber KG</td>
+    </tr>
+	<tr>
+      <td class="table_head">60+</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_1_n" id="dx_d1_1_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_1_w" id="dx_d1_1_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>  
+	<tr>
+      <td class="table_head">55x60</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_2_n" id="dx_d1_2_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_2_w" id="dx_d1_2_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head">50x55</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_3_n" id="dx_d1_3_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_3_w" id="dx_d1_3_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head">45x50</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_4_n" id="dx_d1_4_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_4_w" id="dx_d1_4_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head">40x45</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_5_n" id="dx_d1_5_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_5_w" id="dx_d1_5_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head">35x40</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_6_n" id="dx_d1_6_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_6_w" id="dx_d1_6_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head">30x35</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d1_7_n" id="dx_d1_7_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d1_7_w" id="dx_d1_7_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+    <tr>
+      <td class="table_head" style="color: #ADADAD">25x30</td>
+      <td class="ac pr-5"><input type="number" min="-1" max="100" step="0.05" name="dx_d1_8_n" id="dx_d1_8_n" value="" class="form-control" autocomplete="dasdz423423" required></td>
+      <td class="ac"><input type="number" min="-1" max="100" step="0.05" name="dx_d1_8_w" id="dx_d1_8_w" value="" class="form-control" autocomplete="dasdz423423" required></td>
+    </tr>
+      
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Stem #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_stems1" id="td_stems1" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>  
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Plant #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_plants1" id="td_plants1" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>
+	  
+  </tbody>
+</table>
+</div>
+
+<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
+<table class="BALTable" style="width:96%;">
+  <tbody>
+	<tr>
+    <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 2</h1></td>
+    </tr>  
+    <tr>
+      <td></td>
+      <td class="table_col_head">Tuber #</td>
+      <td class="table_col_head">Tuber KG</td>
+    </tr>
+	<tr>
+      <td class="table_head">60+</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_1_n" id="dx_d2_1_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_1_w" id="dx_d2_1_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>  
+	<tr>
+      <td class="table_head">55x60</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_2_n" id="dx_d2_2_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_2_w" id="dx_d2_2_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">50x55</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_3_n" id="dx_d2_3_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_3_w" id="dx_d2_3_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">45x50</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_4_n" id="dx_d2_4_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_4_w" id="dx_d2_4_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">40x45</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_5_n" id="dx_d2_5_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_5_w" id="dx_d2_5_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">35x40</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_6_n" id="dx_d2_6_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_6_w" id="dx_d2_6_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">30x35</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d2_7_n" id="dx_d2_7_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d2_7_w" id="dx_d2_7_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head" style="color: #ADADAD">25x30</td>
+      <td class="ac pr-5"><input type="number" min="-1" max="100" step="0.05" name="dx_d2_8_n" id="dx_d2_8_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="-1" max="100" step="0.05" name="dx_d2_8_w" id="dx_d2_8_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+      
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Stem #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_stems2" id="td_stems2" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>
+      
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Plant #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_plants2" id="td_plants2" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>
+	  
+  </tbody>
+</table>
+</div>
+			
+<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
+<table class="BALTable" style="width:96%;">
+  <tbody>
+	<tr>
+    <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 3</h1></td>
+    </tr>  
+    <tr>
+      <td></td>
+      <td class="table_col_head">Tuber #</td>
+      <td class="table_col_head">Tuber KG</td>
+    </tr>
+	<tr>
+      <td class="table_head">60+</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_1_n" id="dx_d3_1_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_1_w" id="dx_d3_1_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>  
+	<tr>
+      <td class="table_head">55x60</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_2_n" id="dx_d3_2_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_2_w" id="dx_d3_2_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">50x55</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_3_n" id="dx_d3_3_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_3_w" id="dx_d3_3_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">45x50</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_4_n" id="dx_d3_4_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_4_w" id="dx_d3_4_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">40x45</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_5_n" id="dx_d3_5_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_5_w" id="dx_d3_5_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">35x40</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_6_n" id="dx_d3_6_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_6_w" id="dx_d3_6_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">30x35</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d3_7_n" id="dx_d3_7_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d3_7_w" id="dx_d3_7_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head" style="color: #ADADAD">25x30</td>
+      <td class="ac pr-5"><input type="number" min="-1" max="100" step="0.05" name="dx_d3_8_n" id="dx_d3_8_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="-1" max="100" step="0.05" name="dx_d3_8_w" id="dx_d3_8_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+      
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Stem #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_stems3" id="td_stems3" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>
+	<tr>
+      <td class="table_head" style="color: #ADADAD">Plant #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_plants3" id="td_plants3" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>  
+  </tbody>
+</table>
+</div>
+			
+			
+			
+<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
+<table class="BALTable" style="width:96%;">
+  <tbody>
+	<tr>
+    <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 4</h1></td>
+    </tr>  
+    <tr>
+      <td></td>
+      <td class="table_col_head">Tuber #</td>
+      <td class="table_col_head">Tuber KG</td>
+    </tr>
+	<tr>
+      <td class="table_head">60+</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_1_n" id="dx_d4_1_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_1_w" id="dx_d4_1_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>  
+	<tr>
+      <td class="table_head">55x60</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_2_n" id="dx_d4_2_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_2_w" id="dx_d4_2_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">50x55</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_3_n" id="dx_d4_3_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_3_w" id="dx_d4_3_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">45x50</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_4_n" id="dx_d4_4_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_4_w" id="dx_d4_4_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">40x45</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_5_n" id="dx_d4_5_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_5_w" id="dx_d4_5_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">35x40</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_6_n" id="dx_d4_6_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_6_w" id="dx_d4_6_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head">30x35</td>
+      <td class="ac pr-5"><input type="number" min="0" max="100" step="0.05" name="dx_d4_7_n" id="dx_d4_7_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="0" max="100" step="0.05" name="dx_d4_7_w" id="dx_d4_7_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+    <tr>
+      <td class="table_head" style="color: #ADADAD">25x30</td>
+      <td class="ac pr-5"><input type="number" min="-1" max="100" step="0.05" name="dx_d4_8_n" id="dx_d4_8_n" value="" class="form-control" autocomplete="dasdz423423" ></td>
+      <td class="ac"><input type="number" min="-1" max="100" step="0.05" name="dx_d4_8_w" id="dx_d4_8_w" value="" class="form-control" autocomplete="dasdz423423" ></td>
+    </tr>
+      
+    <tr>
+      <td class="table_head" style="color: #ADADAD">Stem #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_stems4" id="td_stems4" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>
+	<tr>
+      <td class="table_head" style="color: #ADADAD">Plant #</td>
+      <td class="ac"><input type="number" min="0" max="50" step="1" name="td_plants4" id="td_plants4" value="0" class="form-control ac" autocomplete="dasdz423423"></td>
+      <td class="ac"></td>
+    </tr>  
+  </tbody>
+</table>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+				<div class="form-row mt-3">	
+
+					<div class="warnbox" id="testdig_warn"><strong>This Test Dig is Complete</strong><br>This will auto sync with DIG once you have a connection. You can still make updates just now.</div>
+
+					
+					
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="td_date">Test Date</label>
+						<input type="date" class="form-control" name="td_date" id="td_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="td_field_area">Field Area</label>
+					<input type="number" disabled name="td_field_area" id="td_field_area" value="" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="td_area">Dig Length</label>
+					<input type="number" min="1" step="0.1" name="td_area" id="td_area" value="1" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="td_area2">Dig Width</label>
+					<input type="number" min="1" step="0.005" name="td_area2" id="td_area2" value="0.925" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+         
+					<div class="form-group col-md-3 col-lg-2"><label for="td_wastage_ratio">Waste %</label>
+					<input type="number" min="0" max="99" step="1" name="td_wastage_ratio" id="td_wastage_ratio" value="5" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="CropRating">Crop Rating [1: Excellent 5: Poor]</label>
+					<select name="CropRating" id="CropRating" class="form-control">
+						<option value="0.0">Select</option>
+						<option value="1.0">1</option><option value="1.5">1.5</option>
+						<option value="2.0">2</option><option value="2.5">2.5</option>
+						<option value="3.0">3</option><option value="3.5">3.5</option>
+						<option value="4.0">4</option><option value="4.5">4.5</option>
+						<option value="5.0">5</option>
+					</select>
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="td_score">Test Dig Rating</label>
+					<select name="td_score" id="td_score" class="form-control">
+						<option value="0">Select</option>
+						<option value="1.0">1</option><option value="1.5">1.5</option>
+						<option value="2.0">2</option><option value="2.5">2.5</option>
+						<option value="3.0">3</option><option value="3.5">3.5</option>
+						<option value="4.0">4</option><option value="4.5">4.5</option>
+						<option value="5.0">5</option>
+					</select>	
+					</div>
+					
+					<label for="td_disease">Comments</label>
+					<div class="form-group col-md-12 col-lg-12">						
+					<textarea class="form-control" name="td_disease" style="height: auto !important;" placeholder="Disease" id="td_disease"></textarea>
+					<textarea class="form-control mt-2" name="td_pest" style="height: auto !important;" placeholder="Pest" id="td_pest"></textarea>	
+					<textarea class="form-control mt-2 mb-2" name="td_coments" style="height: auto !important;" placeholder="Comments" id="td_coments"></textarea>						
+					</div>
+					
+					
+				</div>
+			
+			
+
+			
+			
+			
+			
+			
+
+				<div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
+
+					<div class="form-group col-md-12 col-lg-2" style="margin-top: 60px;">
+						<label for="confirm_crop">Confirm Crop #</label>
+						<input type="text" class="form-control" name="confirm_crop" id="confirm_crop" placeholder="Confirm Crop #" required value="" />
+					</div>
+
+
+					<div class="form-group col-md-12 col-lg-12 text-center">		
+						
+					<input type="hidden" value="" name="dig_myuid" id="dig_myuid">
+					<input type="hidden" value="" name="dig_cropshouldbe" id="dig_cropshouldbe">	
+					<input type="hidden" value="0" name="dig_allowflysave" id="dig_allowflysave">	
+					<button id="submit_tdig" class="but_red" onClick="save_and_complete_testdig();" name="submit_tdig">Complete &amp Submit Test Dig</button>
+					</div>
+
+
+
+				</div>
+
+			
+			
+</div><!--test_dig_form-->			
+			
+</div><!--test_dig_form_all-->
+		
+</div>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div data-role="page" id="page_box_count">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Box Count: </h1>
+		</div>
+		
+		<div data-role="content">
+			<div class="p-6 mt-2 mb-3" id="Harvest_Box_Count">
+            <div class="mb-3 p-box2 rounded orngebg">
+				
+				<div class="form-row" id="box_count_form">	
+                    
+					<div class="warnbox" id="boxcount_warn"><strong>Box Count is Complete</strong><br>This will auto sync with DIG once you have a connection. You can still make updates just now.</div>
+                    <h1 class="mb-0 pt-2">Harvest Box Count</h1>
+					<h2 class="mb-2 pt-1">Current Boxes: <strong id="current_bc" class="peagreen">50</strong></h2>
+					
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="bc_date">Count Date</label>
+						<input type="date" class="form-control" name="bc_date" id="bc_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2"><label for="bc_new">New Box Count</label>
+						<input type="number" name="bc_new" id="bc_new" value="" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<div class="form-group col-md-3 col-lg-2 pb-2"><label for="bc_wastage_ratio">Waste %</label>
+						<input type="number" min="0" max="99" step="1" name="bc_wastage_ratio" id="bc_wastage_ratio" value="5" required class="form-control" autocomplete="dasdz423423" />
+					</div>
+					
+					<h3 class="peagreen pb-2"><strong>Remember the Harvest Date. Currently: <span class="white" id="harv_date_now"></span></strong></h3>
+					
+				</div>
+                
+                
+                
+				<div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
+					<div class="form-group col-md-12 col-lg-12 text-center">							
+						<input type="hidden" value="" name="box_myuid" id="box_myuid">
+						<input type="hidden" value="0" name="box_allowflysave" id="box_allowflysave">	
+						<button id="submit_boxcount" class="but_red" onClick="save_and_complete_boxcount();" name="submit_boxcount">Complete &amp Submit Box Count</button>
+					</div>
+				</div>
+				
+			</div>
+            </div>
+			
+			
+			
+			<div class="p-6 mt-2 mb-1 gradeinventbits">
+			<div class="mb-1 p-box2 rounded overlaybg" id="box_splits_changer">
+                
+					<div class="form-row">	
+						<input type="hidden" name="bx_size_0_safe" id="bx_size_0_safe" value="" style="width: 160px;">
+                        <h1 class="mb-0">Graded Box Inventory</h1>
+						<h2 class="mb-1">Current Boxes: <span class="peagreen" id="bx_txt"></span></h2>
+                        <h4 class="peagreen pb-2"><strong>Please enure your splits are accurate. Updates are applied after sync.</strong></h4>
+                        
+						<table id="split_table" style="width: 100%">		
+							<tbody>
+								<tr>
+									<td class="p-3"><h3 class="mb-0 pt-1">As Dug</h3></td>
+									<td class="p-3"><input type="number" disabled="" name="bx_size_0" id="bx_size_0" value="182.00" class="form-control ac" autocomplete="dasdz423423" placeholder="As Dug" style="width: 140px;"> *Auto</td>
+								</tr>
+                            </tbody>
+						</table>
+                        
+                        <h4 class="peagreen pb-2"><strong class="white">To delete a split, enter xxxx into the note.</strong></h4>
+					</div>
+
+				</div>
+			</div>
+            
+            
+			<div class="p-6 mt-2 mb-1 gradeinventbits">
+			<div class="mb-1 p-box2 rounded" style="background: #686752;">
+
+			
+					<div class="form-row mt-0">	
+						<h1 class="mb-0">Add a New Split</h1>                        
+                        
+                        
+                        
+                        
+                        <h2>New Split #1</h2>
+						<table style="width: 100%">
+							<tbody>
+                                
+                                <tr><td class="ac">Size 1</td><td class="ac">Size 2</td><td class="ac">Tns</td><td class="ac">Tubs/50kg</td></tr>
+                                
+								<tr>
+								<td class="p-2">
+									<select name="new_siz_1" id="new_siz_1" class="form-control d-inline-block" style="width: 130px;">
+										<option value="25">25</option>
+										<option value="30">30</option>
+										<option value="35">35</option>
+										<option value="40">40</option>
+										<option value="45">45</option>
+										<option value="50">50</option>
+										<option value="55">55</option>
+										<option value="60">60</option>
+                                        <option value="65">65</option>
+                                        <option value="70">70</option>
+                                        <option value="75">75</option>
+                                        <option value="80">80</option>
+                                        <option value="85">85</option>
+									</select>
+								</td>
+								<td class="p-2">
+									<select name="new_siz_2" id="new_siz_2" class="form-control d-inline-block" style="width: 130px;">
+										<option value="30">30</option>
+										<option value="35">35</option>
+										<option value="40">40</option>
+										<option value="45">45</option>
+										<option value="50">50</option>
+										<option value="55">55</option>
+										<option value="60">60</option>
+										<option value="65">65</option>
+                                        <option value="70">70</option>
+                                        <option value="75">75</option>
+                                        <option value="80">80</option>
+                                        <option value="85">85</option>
+                                        <option value="90">90</option>
+									</select>	
+								</td>
+								<td class="p-2"><input type="number" min="-200" max="900.00" step="0.005" name="bx_size_new" id="bx_size_new" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
+                                <td class="p-2"><input type="number" min="0" max="5000" step="1" name="bx_tubs_new" id="bx_tubs_new" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Tubs/50kg" style="width: 100px;"></td>
+								</tr>
+                                <tr><td colspan="4">Comments/Notes:<br><input type="text" name="bx_note_new" id="bx_note_new" value="" placeholder="Split note?" autocomplete="dasdz423423" style="width: 100%; background:#7f7e6b; color:#c5c4a6;"></td></tr>
+
+							</tbody>
+						</table>
+                        
+                        
+                        <h2>New Split #2</h2>
+                        <table style="width: 100%">
+							<tbody>
+								<tr>
+								<td class="p-2">
+									<select name="new_siz_1b" id="new_siz_1b" class="form-control d-inline-block" style="width: 130px;">
+										<option value="25">25</option>
+										<option value="30">30</option>
+										<option value="35">35</option>
+										<option value="40">40</option>
+										<option value="45">45</option>
+										<option value="50">50</option>
+										<option value="55">55</option>
+										<option value="60">60</option>
+                                        <option value="65">65</option>
+                                        <option value="70">70</option>
+                                        <option value="75">75</option>
+                                        <option value="80">80</option>
+                                        <option value="85">85</option>>
+									</select>
+								</td>
+								<td class="p-2">
+									<select name="new_siz_2b" id="new_siz_2b" class="form-control d-inline-block" style="width: 130px;">
+										<option value="30">30</option>
+										<option value="35">35</option>
+										<option value="40">40</option>
+										<option value="45">45</option>
+										<option value="50">50</option>
+										<option value="55">55</option>
+										<option value="60">60</option>
+										<option value="65">65</option>
+                                        <option value="70">70</option>
+                                        <option value="75">75</option>
+                                        <option value="80">80</option>
+                                        <option value="85">85</option>
+                                        <option value="90">90</option>
+									</select>	
+								</td>
+								<td class="p-2"><input type="number" min="-200" max="900.00" step="0.005" name="bx_size_newb" id="bx_size_newb" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
+								 <td class="p-2"><input type="number" min="0" max="5000" step="1" name="bx_tubs_newb" id="bx_tubs_newb" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Tubs/50kg" style="width: 100px;"></td>
+                                </tr>
+                                <tr><td colspan="4">Comments/Notes:<br><input type="text" name="bx_note_newb" id="bx_note_newb" value="" placeholder="Split note?" autocomplete="dasdz423423" style="width: 100%; background:#7f7e6b; color:#c5c4a6;"></td></tr>
+
+							</tbody>
+						</table>
+                        
+                        <h4 class="peagreen pb-2"><strong>If you need to submit more than 2 new splits, add these first, then SYNC, reload the crop and repeat.</strong></h4>
+                        <h3 class="bggreen mb-1 ac">Want to add Plant-back? Make the tonnes NEGATIVE</h3>
+                        
+                        
+					</div>
+
+
+					
+
+				</div>
+			</div>
+			
+			<div class="form-row mb-0 pl-3 pr-3 pt-3 my-3 rounded gradeinventbits" style="padding-bottom: 40px">	
+                <div class="form-group col-md-12 col-lg-12 text-center">
+
+                    <button id="submit_splits" class="but_red" onClick="save_and_complete_box_splits();" name="submit_splits">Complete &amp Submit Box Splits</button>
+                </div>
+            </div>
+			
+			
+			
+
+			
+			
+			
+			
+	
+		</div>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div data-role="page" id="page_dress">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Grading: </h1>
+		</div>
+		<!--id, dress_myuid, gid, CropNo, var_type_grade_country, drs_by_date, amt, chem_at, store_at, inspection_ date, size_name, ton1, ton2, ton3, diff_chemical, boxes_used, boxes_remain, farmer_ready, notes_after_dress-->
+		<div data-role="content" id="dress_form">
+			
+		
+			
+		<div class="p-6">
+			
+		<h1 class="white" id="di_h1">Grading or Pickup Instruction</h1>			
+        <h2 class="mb-1 pb-0 dark"><strong id="var_type_grade_country"></strong></h2>
+        <h2 class="mb-1 p-0"><strong class="red" id="amt"></strong> of <strong class="dark" id="size_name"></strong></h2>
+        <h2 class="mb-2 p-0 green" id="drs_by_date"></h2>
+        <input type="hidden" name="amt_req_num" id="amt_req_num" value="0" >
+            
+			
+  
+            
+			<div class="form-row">	
+
+					<div class="warnbox h4" id="dress_warn"><strong>Grading/Despatch is Complete</strong><br>Remember to sync with DIG once you have a connection. If you need to make a change, please contact business admin.</div>
+					
+
+                    <input type="hidden" name="chem_at" id="chem_at" value="0">
+                    <input type="hidden" name="store_at" id="store_at" value="0">
+                
+                
+                
+<div id="dress_1">
+    
+                    <div class="warnbox h4" id="dress_open">
+                        <h2 class="mb-2">Early Grading Instruction</h2>
+
+                        This is an open grading instruction, an early notice to grade. Cert Labels are not required at this stage. Another instruction will be sent when this out-turn is ready to be delivered.
+    
+                        <div class="warnbox2 my-3">
+                            <h3>Are you doing a part grading?</h3>
+                            <p>You can return a part grading if you are grading out full crop, and want to return results in stages.</p>
+                            
+                            <div class="ac" style="width: 180px; margin: 10px auto;">
+                                <strong>Actual Part Grade Tonnes</strong>
+                                <input type="number" min="0" max="400" step="0.001" name="part_grade_tns" id="part_grade_tns" value="0" required class="form-control ac" style="width: 170px;" autocomplete="dasdz423423">
+                            </div>
+                            <p>Useable returned Tonnes excluding waste.</p>
+                        </div>
+                    </div>
+    
+    
+					<div class="form-group col-md-3 col-lg-2"><label for="diff_chemical">Chemical Used (if different)</label>
+					<input type="text" name="diff_chemical" id="diff_chemical" value="" class="form-control" autocomplete="dasdz423423" />
+					</div>
+				
+					<div class="form-group col-md-3 col-lg-2"><label for="inspection_date">Inspection Date [Or Ready Date if not certified]</label>
+						<input type="date" class="form-control" name="inspection_date" id="inspection_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" />
+					</div>
+				
+	
+			
+				
+<div class="form-row mb-3 pb-3 pl-3 pr-3 pt-1 mt-3 rounded" style="background: #72715b">
+<table class="BALTable" style="width:auto;">
+    <tbody>
+        
+        <tr>
+        <td class="table_head py-5" colspan="3"><h3>Grading Results</h3></td>
+        </tr>
+        <tr>
+        <td class="table_head py-5">Split</td><td class="table_head py-5">Tonnes</td><td class="table_head py-5">Tubs #</td>
+        </tr>  
+        <tr id="size_1">
+        <td class="table_head pb-1"><h4>S1</h4></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="400" step="0.001" name="ton1" id="ton1" value="0" required class="form-control ml-3" style="width: 140px" autocomplete="dasdz423423" ></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="4000" step="1" name="tub1" id="tub1" value="0" required class="form-control ml-3" style="width: 100px" autocomplete="dasdz423423" ></td>
+        </tr>  
+        <tr id="size_2">
+        <td class="table_head pb-1"><h4>S2</h4></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="400" step="0.001" name="ton2" id="ton2" value="0" required class="form-control ml-3" style="width: 140px" autocomplete="dasdz423423" ></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="4000" step="1" name="tub2" id="tub2" value="0" required class="form-control ml-3" style="width: 100px" autocomplete="dasdz423423" ></td>
+        </tr>
+        <tr id="size_3">
+        <td class="table_head"><h4>S3</h4></td>
+        <td class="ac pl-10"><input type="number" min="0" max="400" step="0.001" name="ton3" id="ton3" value="0" required class="form-control ml-3" style="width: 140px" autocomplete="dasdz423423" ></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="4000" step="1" name="tub3" id="tub3" value="0" required class="form-control ml-3" style="width: 100px" autocomplete="dasdz423423" ></td>
+        </tr>
+        <tr id="size_4">
+        <td class="table_head"><h4>S4</h4></td>
+        <td class="ac pl-10"><input type="number" min="0" max="400" step="0.001" name="ton4" id="ton4" value="0" required class="form-control ml-3" style="width: 140px" autocomplete="dasdz423423" ></td>
+        <td class="ac pb-1 pl-10"><input type="number" min="0" max="4000" step="1" name="tub4" id="tub4" value="0" required class="form-control ml-3" style="width: 100px" autocomplete="dasdz423423" ></td>
+        </tr>  
+
+
+    </tbody>
+</table>
+</div>
+		
+				
+				<div class="form-row mb-3 p-20 mt-3 rounded" style="background: #4d4c3a">
+
+                        <label for="boxes_used" class="h3">Did you use As-Dug Boxes?</label>
+                        <p style="margin-bottom: 15px;">If you graded this from all AD boxes, tell us how many were used, and how much waste was left.</p>
+                    
+                        <table>
+                        <tr><td><strong>Boxes Used</strong></td><td style="padding-left: 15px;"><strong>Waste/Brock Tonnes</strong></td></tr>
+                        <tr>
+                            <td><input type="number" min="0" max="800" step="0.01" name="boxes_used" id="boxes_used" value="0" required class="form-control" style="width: 110px" autocomplete="dasdz423423" ></td>
+                            <td style="padding-left: 15px;"><input type="number" min="0" max="800" step="0.01" name="boxes_waste" id="boxes_waste" value="0" required class="form-control" style="width: 110px" autocomplete="dasdz423423" ></td>
+                            </tr>
+                        </table>
+               
+                        
+	
+                </div>
+                    	
+          
+				    <input type="hidden" name="boxes_remain" id="boxes_remain" value="0" />
+                
+                    
+    
+					<div class="form-group col-md-3 col-lg-3" id="dress_open_labels"><label for="got_labels">GOT LABELS?</label>
+						<select name="got_labels" id="got_labels" class="form-control">
+							<option value="0">No</option>
+							<option value="1">Yes</option>
+						</select>
+					</div>
+                
+                    <div class="form-group col-md-3 col-lg-3"><label for="farmer_ready">GRADING READY? [For despatch/pickup]</label>
+						<select name="farmer_ready" id="farmer_ready" class="form-control">
+							<option value="0">NOT Ready</option>
+							<option value="1">YES - Ready</option>
+						</select>
+					</div>
+</div>
+                
+                
+<div id="dress_2">
+    
+    <div class="form-group col-md-3 col-lg-2"><label for="Despatch_Ref">Despatch/Docket Number</label>
+        <input type="text" name="Despatch_Ref" id="Despatch_Ref" value="" class="form-control" autocomplete="dasdz423423" />
+    </div> 
+    
+    <div class="form-group col-md-3 col-lg-2"><label for="Vehicle_Reg">Vehicle Registration</label>
+        <input type="text" name="Vehicle_Reg" id="Vehicle_Reg" value="" class="form-control" autocomplete="dasdz423423" />
+    </div> 
+                
+</div>                
+                
+                
+                
+                
+                
+                
+					<div class="form-group col-md-12 col-lg-12 pt-2">
+					<label for="notes_after_dress">Comments</label>	
+					<textarea class="form-control" name="notes_after_dress" style="height: auto !important; min-height: 100px !important;" placeholder="Comments" id="notes_after_dress"></textarea>
+					</div>
+					
+					
+				</div>
+			
+			
+	
+
+				<div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
+					<div class="form-group col-md-12 col-lg-12 text-center">
+					<input type="hidden" value="" name="dress_id" id="dress_id">
+                    <input type="hidden" value="0" name="dress_id_type" id="dress_id_type">    
+					<input type="hidden" value="" name="dress_gid" id="dress_gid">	
+					<input type="hidden" value="" name="dress_myuid" id="dress_myuid">
+					<input type="hidden" value="0" name="dress_allowflysave" id="dress_allowflysave">	
+					<button id="submit_dress" class="but_red" onClick="save_and_complete_dressing();" name="submit_dress">Save &amp Submit</button>
+					</div>
+                    <!--<a onClick="capturePhoto(4, 99);" class="ml-2 ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Crop Photo</a>-->
+                    <div class="mb-2 mt-2 ac"><a onClick="capturePhoto(1, 99);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Document/Photo</a></div>
+                    <div class="mb-3 mt-3 h4 warnbox green">Complete the grading/despatch form. You can also photograph despatch document, or photo of finished crop sample.</div>
+				</div>
+			    
+			</div>
+		</div>
+
+</div>	
+	
+    
+    
+    
+    
+<div data-role="page" id="page_passport">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Passport: </h1>
+		</div>
+
+		<div data-role="content" id="pass_form">
+            <div class="p-1">
+
+<h1 class="white">Passport</h1>	
+<div class="form-row mb-0 p-1 my-2">
+<h2 id="cp_name"></h2>
+<h2 id="cp_trade"></h2> 
+    
+<div class="p-10 darkbg rounded ppisdone ac" style="background: #822E2E!important; margin-bottom: 15px; margin-top: 8px">
+    <strong>Load Passport has been sent to the customer. It is completed.</strong>
+</div>
+    
+    
+<div id="pp_state_change_div" class="p-10 darkbg rounded ac" style="background: #93552f!important; margin-bottom: 15px; margin-top: 8px;">
+    <input type="hidden" name="pp_state_id" id="pp_state_id" value="" autocomplete="dasdz423423" />
+    <h2>Current Load Status is: <strong id="pp_state_now" class="but_red white rounded" style="padding: 3px 10px;">State Now</strong></h2>
+    <h2><strong>Advance this Trade Status?</strong></h2>
+    <button id="bump_pp_state_but" class="but_green" onClick="bump_pp_state();" name="bump_pp_state_but" style="font-size: 18px!important;">Advance Trade to <strong id="pp_state_next">NEXT</strong></button>
+    
+</div>
+    
+    
+<form id="passform" style="padding: 0px; background: transparent;">
+<div class="form px-0 pb-2">
+    <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important;">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_harvest_date">Harvest Date</label>
+            <input type="date" name="gcn_harvest_date" id="gcn_harvest_date" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_collection_date">Collection/Dispatch Date</label>
+            <input type="datetime-local" name="gcn_collection_date" id="gcn_collection_date" class="form-control" value="" placeholder="dd/mm/yyyy" data-rule="datetime" data-msg="Please enter a valid date time" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_delivery_date">Delivery Date/Time</label>
+            <input type="datetime-local" name="gcn_delivery_date" id="gcn_delivery_date"  class="form-control" value="" placeholder="dd/mm/yyyy" data-rule="datetime" data-msg="Please enter a valid date time">
+        </div>
+
+        <div class="form-group col-lg-3 col-md-6 col-sm-12">
+            <label for="gcn_customer_site">Customer/Site</label>
+            <input type="text" name="gcn_customer_site" id="gcn_customer_site" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_customer_ref">Customer Ref</label>
+            <input type="text" name="gcn_customer_ref" id="gcn_customer_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_load_number">Merchant Load #</label>
+            <input type="text" name="gcn_load_number" id="gcn_load_number" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+            <label for="gcn_merc_prod_number">Merchant Produce #</label>
+            <input type="text" name="gcn_merc_prod_number" id="gcn_merc_prod_number" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+    </div>
+    <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important;">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_grower_name">Grower/Farm Name</label>
+            <input type="text" name="gcn_grower_name" id="gcn_grower_name" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_grower_name_real">Full Persons Name</label>
+            <input type="text" name="gcn_grower_name_real" id="gcn_grower_name_real" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+            <label for="gcn_grower_address">Grower Address</label>
+            <textarea name="gcn_grower_address" id="gcn_grower_address" class="form-control tuc" autocomplete="dasdz423423" ></textarea>
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_crop_grown">Crop Grown - County</label>
+            <input type="text" name="gcn_crop_grown" id="gcn_crop_grown" value="" class="form-control tuc" placeholder="e.g. Angus or Suffolk" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_crop_origin">Crop Origin</label>
+            <input type="text" name="gcn_crop_origin" id="gcn_crop_origin" value="" class="form-control tuc" placeholder="e.g. UK or SCO" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_field_ref">Field Ref</label>
+            <input type="text" name="gcn_field_ref" id="gcn_field_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_store_ref">Store Ref/Type</label>
+            <input type="text" name="gcn_store_ref" id="gcn_store_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+            <label for="gcn_soil_type">Soil Type</label>
+            <select name="gcn_soil_type" id="gcn_soil_type" class="form-control">
+                <option value="SAND">Sand</option>
+                <option value="LOAMY SAND">Loamy Sand</option>
+                <option value="SANDY LOAM">Sandy Loam</option>
+                <option value="CLAY LOAM">Clay Loam</option>
+                <option value="CLAY">Clay</option>
+                <option value="SILT">Silt</option>
+                <option value="PEAT">Peat</option>
+            </select>
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+            <label for="gcn_loaded_by">Loaded By</label>
+            <input type="text" name="gcn_loaded_by" id="gcn_loaded_by" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_haulier">Haulier</label>
+            <input type="text" name="gcn_haulier" id="gcn_haulier" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_haul_contact">Haulier Contact</label>
+            <input type="text" name="gcn_haul_contact" id="gcn_haul_contact" value="" class="form-control tuc" placeholder="Mobile Number" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_haul_reg">Vehicle Reg/Trailer No</label>
+            <input type="text" name="gcn_haul_reg" id="gcn_haul_reg" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_driver_name">Driver Name</label>
+            <input type="text" name="gcn_driver_name" id="gcn_driver_name" style="text-transform: uppercase" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        
+        
+        
+  <div style="background: #474b55; border-radius: 10px; padding: 25px 20px; margin-top: 35px;" id="boxbastard">
+      
+        <h1 class="white">Boxes and Weights</h1>   
+        <h3 class="white">Please take care adding this, ensure your entries are accurate.</h3>
+      
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 mt-25">
+            <label for="gcn_container_no">Container #</label>
+            <input type="text" name="gcn_container_no" id="gcn_container_no" value="" placeholder="(If Applicable)" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_bags_boxes_bulk">Bags/Boxes/Bulk</label>
+            <select name="gcn_bags_boxes_bulk" id="gcn_bags_boxes_bulk" class="form-control d-inline-block">
+                <option value="BAGS">BAGS</option>
+                <option value="BOXES">BOXES</option>
+                <option value="BULK">BULK</option>
+            </select>
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_bags_boxes_bulk_num"># Bags/Boxes/Bulk</label>
+            <input type="number" name="gcn_bags_boxes_bulk_num" id="gcn_bags_boxes_bulk_num" min="0" value="" class="form-control" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_box_weight">Box/Bag Weight (Est)</label>
+            <input type="text" name="gcn_box_weight" id="gcn_box_weight" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_weighbridge_weight">Weighbridge Weight</label>
+            <input type="text" name="gcn_weighbridge_weight" id="gcn_weighbridge_weight" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+        
+        
+       
+        <h1 class="white mt-25">Box Marks [OUT]</h1>   
+        <h3 class="white">Please ensure your entries are accurate.</h3> 
+        
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 mt-1">
+            <label for="gcn_marks_out">Box Marks <strong>OUTGOING</strong> e.g: 12 GVAP, 5 MP, 8 JWS</label>
+            <input type="text" name="gcn_marks_out" id="gcn_marks_out" value="" class="form-control tuc" placeholder="e.g. Plain, Supplier, Other" autocomplete="dasdz423423" />
+            <div class="my-2" id="grower_box_marks_div"></div>
+            <!--<input type="text" name="grower_box_avail_marks" id="grower_box_avail_marks" value="" autocomplete="dasdz423423" />-->
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_box_out">Box # <strong>OUT</strong> Total</label>
+            <input type="number" min="0" max="26" name="gcn_box_out" id="gcn_box_out" value="" style="font-size: 15px!important;" class="form-control tuc" placeholder="[Number Only]" autocomplete="dasdz423423" />
+        </div>
+        
+        <h1 class="white mt-25">Box Marks [IN]</h1> 
+        <div class="form-group col-lg-3 col-md-6 col-sm-12">
+            <label for="gcn_marks_in">Box Marks <strong>INCOMING</strong></label>
+            <input type="text" name="gcn_marks_in" id="gcn_marks_in" value="" class="form-control tuc" placeholder="e.g. Plain, Supplier, Other" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_box_in">Box # <strong>IN</strong> Total</label>
+            <input type="number" min="0" max="60" name="gcn_box_in" id="gcn_box_in" value="" style="font-size: 15px!important;" class="form-control tuc" placeholder="[Number Only]" autocomplete="dasdz423423" />
+        </div>
+      
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="gcn_return_customer">Customer <strong>IN Boxes</strong> from</label>
+            <input type="text" name="gcn_return_customer" id="gcn_return_customer" value="" class="form-control tuc" placeholder="[if different from Boxes OUT customer]" autocomplete="dasdz423423" />
+        </div>
+      
+        
+ </div>        
+        
+        
+
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 gcn_type_1 mt-25">
+            <label for="gcn_cust_site_deliver_to">Customer Site - to be delivered to?</label>
+            <input type="text" name="gcn_cust_site_deliver_to" id="gcn_cust_site_deliver_to" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+
+
+        
+    </div>
+    <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important;">
+        <div class="form-group col-12">
+            <h4 class="white mb-0">We, The Above, Guarantee the Variety to be:</h4>
+        </div>
+        <div class="form-group col-lg-2">
+            <label for="gcn_variety">Variety</label>
+            <input type="text" name="gcn_variety" id="gcn_variety" value="" class="form-control tuc" autocomplete="dasdz423423" />
+        </div>
+       
+
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="gcn_trailer_type">Trailer Type</label>
+            <select name="gcn_trailer_type" id="gcn_trailer_type" class="form-control">
+                <option value="0">Box</option>
+                <option value="1">Bulker</option>
+            </select>
+        </div>
+
+       
+        <div class="form-group d-inline-block">
+            <label for="">Size #1 <span style="color: #b9c0d3">Size Range &amp; # of Boxes</span></label>
+            <table style="width: 100%"><tr><td>
+                <select name="size1_1" id="size1_1" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="28">28</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td>
+                <select name="size1_2" id="size1_2" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td width="35%">
+                <input type="number" min="0" step="1" name="size1_bx" id="size1_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
+            </td></tr></table>
+        </div>
+        <div class="form-group d-inline-block">
+            <label for="">Size #2 (If Applicable)</label>
+            <table style="width: 100%"><tr><td>
+                <select name="size2_1" id="size2_1" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="25">25</option>
+                    <option value="28">28</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td>
+                <select name="size2_2" id="size2_2" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td width="35%">
+                <input type="number" min="0" step="1" name="size2_bx" id="size2_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
+            </td></tr></table>
+        </div>
+        <div class="form-group d-inline-block">
+            <label for="">Size #3 (If Applicable)</label>
+            <table style="width: 100%"><tr><td>
+                <select name="size3_1" id="size3_1" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="25">25</option>
+                    <option value="28">28</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td>
+                <select name="size3_2" id="size3_2" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option><option value="47">47</option><option value="48">48</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td width="35%">
+                <input type="number" min="0" step="1" name="size3_bx" id="size3_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
+            </td></tr></table>
+        </div>
+        <div class="form-group d-inline-bloc">
+            <label for="">Size #4 (If Applicable)</label>
+            <table style="width: 100%"><tr><td>
+                <select name="size4_1" id="size4_1" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="25">25</option>
+                    <option value="28">28</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td>
+                <select name="size4_2" id="size4_2" class="form-control d-inline-block size0_1">
+                    <option value="0">?</option>
+                    <option value="30">30</option>
+                    <option value="35">35</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
+                    <option value="45">45</option>
+                    <option value="50">50</option>
+                    <option value="55">55</option>
+                    <option value="60">60</option>
+                    <option value="65">65</option>
+                    <option value="70">70</option>
+                    <option value="75">75</option>
+                    <option value="80">80</option>
+                    <option value="85">85</option>
+                </select>
+                </td><td width="35%">
+                <input type="number" min="0" name="size4_bx" id="size4_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
+            </td></tr></table>
+        </div>
+        <div class="form-group d-inline-block">
+            <label for="gcn_graded">Grading Type?</label>
+            <select name="gcn_graded" id="gcn_graded" class="form-control">
+                <option value="1">Graded</option>
+                <option value="0">Ungraded</option>
+            </select>
+        </div>
+        <div class="form-group d-inline-block">
+            <label for="gcn_is_org">Organic Load? * </label>
+            <select name="gcn_is_org" id="gcn_is_org" class="form-control">
+                <option value="0">No</option>
+                <option value="1">Yes, Organic</option>
+            </select>
+        </div>
+
+        <div class="form-group col-12 mt-3 gcn_type_1">
+            <h3>Loading Layout</h3>
+            <p style="font-weight:200; color: #ccc" class="mb-0">Choose the Size Split # from the loaded splits above. <span class="peagreen">Hint:</span> You can select the position and type number 1,2,3 or 4</p>
+            <div class="mt-3">
+                
+                <table class="BALTable align-top" style="width: 100%">
+                <tr>
+                <td class="align-top" valign="top" style="padding-right: 30px;">
+                <table class="BALTable align-top" style="width: 100%">
+                    <tr class="firstlinetd noborder"><td class="ac" style="background: #575c69!important" colspan="2">FRONT</td></tr>
+                        <tr>
+                            <td><select name="layout_1" id="layout_1" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_14" id="layout_14" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_2" id="layout_2" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_15" id="layout_15" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_3" id="layout_3" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_16" id="layout_16" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_4" id="layout_4" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_17" id="layout_17" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_5" id="layout_5" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_18" id="layout_18" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_6" id="layout_6" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_19" id="layout_19" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>
+                        <tr>
+                            <td><select name="layout_7" id="layout_7" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                            <td><select name="layout_20" id="layout_20" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        </tr>                        
+                    </table>    
+                </td>
+                <td class="align-top" valign="top">
+                    <table class="BALTable align-top" style="width: 100%">
+                    <tr class="firstlinetd noborder"><td class="ac" style="background: #575c69!important" colspan="2">MIDDLE</td></tr>
+                    <tr>
+                        <td><select name="layout_8" id="layout_8" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_21" id="layout_21" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>    
+                    </tr>
+                    <tr>
+                        <td><select name="layout_9" id="layout_9" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_22" id="layout_22" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                    </tr>
+                    <tr>
+                        <td><select name="layout_10" id="layout_10" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_23" id="layout_23" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                    </tr>
+                    <tr>
+                        <td><select name="layout_11" id="layout_11" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_24" id="layout_24" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                    </tr>
+                    <tr>
+                        <td><select name="layout_12" id="layout_12" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_25" id="layout_25" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                    </tr>
+                    <tr>
+                        <td><select name="layout_13" id="layout_13" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                        <td><select name="layout_26" id="layout_26" class="form-control ldlay"><option value="0">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></td>
+                    </tr>
+                    <tr class="firstlinetd noborder"><td class="ac" style="background: #575c69!important" colspan="2">REAR DOOR</td></tr>    
+                    </table>    
+                </td>
+                </tr>
+                
+                </table>
+                
+                
+                
+                
+            </div>
+        </div>
+        
+
+        
+        <div class="form-group col-12 mt-3 gcn_type_1">
+            <h3>Seed Split Information</h3>
+            <div class="mt-3">
+                <table class="BALTable align-top" style="width: 100%">
+                    <tr>
+                        <td>Type</td>
+                        <td class="ac">Size Split #1</td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Variety</strong></td>
+                        <td><input type="text" name="sdv_0_0" id="sdv_0_0" value="" class="form-control font-weight-bold blue" placeholder="if different" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Cert No.</strong></td>
+                        <td><input type="text" name="sdv_0_1" id="sdv_0_1" value="" class="form-control font-weight-bold blue" placeholder="e.g 345123" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Union Grade</strong></td>
+                        <td>
+                        <select name="sdv_0_2" id="sdv_0_2" class="form-control">
+                            <option value="">Select...</option><option value="S">S</option><option value="SE">SE</option><option value="E">E</option><option value="PB">PB</option><option value="A">A</option>   
+                        </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Chem Treatment</strong></td>
+                        <td>
+                            <select name="sdv_0_3" id="sdv_0_3" class="form-control">
+                                <option value="">Select...</option>
+                                <option value="UNTREATED">UNTREATED</option>    
+                                <option value="APPROVED">APPROVED</option>    
+                                <option value="IMAZALIL">IMAZALIL</option>    
+                                <option value="MAXIM">MAXIM</option>    
+                                <option value="MAX+AF">MAX+AF</option>    
+                                <option value="RHINO">RHINO</option>    
+                                <option value="RI">RI</option>    
+                                <option value="TBZ">TBZ</option>    
+                                <option value="TBZ+IM">TBZ+IM</option>
+                            </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Tuber Count</strong></td>
+                        <td><input type="text" name="sdv_0_4" id="sdv_0_4" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Replantable Ha</strong></td>
+                        <td><input type="text" name="sdv_0_5" id="sdv_0_5" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Seed Rate</strong></td>
+                        <td><input type="text" name="sdv_0_6" id="sdv_0_6" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Spacing (cm)</strong></td>
+                        <td><input type="text" name="sdv_0_7" id="sdv_0_7" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>         
+                </table>
+            </div>
+            <div class="mt-3">
+                <table class="BALTable align-top" style="width: 100%">
+                    <tr>
+                        <td>Type</td>
+                        <td class="ac">Size Split #2</td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Variety</strong></td>
+                        <td><input type="text" name="sdv_1_0" id="sdv_1_0" value="" class="form-control font-weight-bold blue" placeholder="if different" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Cert No.</strong></td>
+                        <td><input type="text" name="sdv_1_1" id="sdv_1_1" value="" class="form-control font-weight-bold blue" placeholder="e.g 345123" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Union Grade</strong></td>
+                        <td>
+                        <select name="sdv_1_2" id="sdv_1_2" class="form-control">
+                            <option value="">Select...</option><option value="S">S</option><option value="SE">SE</option><option value="E">E</option><option value="PB">PB</option><option value="A">A</option>   
+                        </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Chem Treatment</strong></td>
+                        <td>
+                            <select name="sdv_1_3" id="sdv_1_3" class="form-control">
+                                <option value="">Select...</option>
+                                <option value="UNTREATED">UNTREATED</option>    
+                                <option value="APPROVED">APPROVED</option>    
+                                <option value="IMAZALIL">IMAZALIL</option>    
+                                <option value="MAXIM">MAXIM</option>    
+                                <option value="MAX+AF">MAX+AF</option>    
+                                <option value="RHINO">RHINO</option>    
+                                <option value="RI">RI</option>    
+                                <option value="TBZ">TBZ</option>    
+                                <option value="TBZ+IM">TBZ+IM</option>
+                            </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Tuber Count</strong></td>
+                        <td><input type="text" name="sdv_1_4" id="sdv_1_4" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Replantable Ha</strong></td>
+                        <td><input type="text" name="sdv_1_5" id="sdv_1_5" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Seed Rate</strong></td>
+                        <td><input type="text" name="sdv_1_6" id="sdv_1_6" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Spacing (cm)</strong></td>
+                        <td><input type="text" name="sdv_1_7" id="sdv_1_7" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>         
+                </table>
+            </div>
+            <div class="mt-3">
+                <table class="BALTable align-top" style="width: 100%">
+                    <tr>
+                        <td>Type</td>
+                        <td class="ac">Size Split #3</td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Variety</strong></td>
+                        <td><input type="text" name="sdv_2_0" id="sdv_2_0" value="" class="form-control font-weight-bold blue" placeholder="if different" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Cert No.</strong></td>
+                        <td><input type="text" name="sdv_2_1" id="sdv_2_1" value="" class="form-control font-weight-bold blue" placeholder="e.g 345123" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Union Grade</strong></td>
+                        <td>
+                        <select name="sdv_2_2" id="sdv_2_2" class="form-control">
+                            <option value="">Select...</option><option value="S">S</option><option value="SE">SE</option><option value="E">E</option><option value="PB">PB</option><option value="A">A</option>   
+                        </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Chem Treatment</strong></td>
+                        <td>
+                            <select name="sdv_2_3" id="sdv_2_3" class="form-control">
+                                <option value="">Select...</option>
+                                <option value="UNTREATED">UNTREATED</option>    
+                                <option value="APPROVED">APPROVED</option>    
+                                <option value="IMAZALIL">IMAZALIL</option>    
+                                <option value="MAXIM">MAXIM</option>    
+                                <option value="MAX+AF">MAX+AF</option>    
+                                <option value="RHINO">RHINO</option>    
+                                <option value="RI">RI</option>    
+                                <option value="TBZ">TBZ</option>    
+                                <option value="TBZ+IM">TBZ+IM</option>
+                            </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Tuber Count</strong></td>
+                        <td><input type="text" name="sdv_2_4" id="sdv_2_4" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Replantable Ha</strong></td>
+                        <td><input type="text" name="sdv_2_5" id="sdv_2_5" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Seed Rate</strong></td>
+                        <td><input type="text" name="sdv_2_6" id="sdv_2_6" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Spacing (cm)</strong></td>
+                        <td><input type="text" name="sdv_2_7" id="sdv_2_7" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>         
+                </table>
+            </div>
+            <div class="mt-3">
+                <table class="BALTable align-top" style="width: 100%">
+                    <tr>
+                        <td>Type</td>
+                        <td class="ac">Size Split #4</td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Variety</strong></td>
+                        <td><input type="text" name="sdv_3_0" id="sdv_3_0" value="" class="form-control font-weight-bold blue" placeholder="if different" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Cert No.</strong></td>
+                        <td><input type="text" name="sdv_3_1" id="sdv_3_1" value="" class="form-control font-weight-bold blue" placeholder="e.g 345123" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Union Grade</strong></td>
+                        <td>
+                        <select name="sdv_3_2" id="sdv_3_2" class="form-control">
+                            <option value="">Select...</option><option value="S">S</option><option value="SE">SE</option><option value="E">E</option><option value="PB">PB</option><option value="A">A</option>   
+                        </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Chem Treatment</strong></td>
+                        <td>
+                            <select name="sdv_3_3" id="sdv_3_3" class="form-control">
+                                <option value="">Select...</option>
+                                <option value="UNTREATED">UNTREATED</option>    
+                                <option value="APPROVED">APPROVED</option>    
+                                <option value="IMAZALIL">IMAZALIL</option>    
+                                <option value="MAXIM">MAXIM</option>    
+                                <option value="MAX+AF">MAX+AF</option>    
+                                <option value="RHINO">RHINO</option>    
+                                <option value="RI">RI</option>    
+                                <option value="TBZ">TBZ</option>    
+                                <option value="TBZ+IM">TBZ+IM</option>
+                            </select>    
+                        </td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Tuber Count</strong></td>
+                        <td><input type="text" name="sdv_3_4" id="sdv_3_4" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Replantable Ha</strong></td>
+                        <td><input type="text" name="sdv_3_5" id="sdv_3_5" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Seed Rate</strong></td>
+                        <td><input type="text" name="sdv_3_6" id="sdv_3_6" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>
+                    <tr class="firstlinetd noborder">
+                        <td class="white pr-3"><strong>Spacing (cm)</strong></td>
+                        <td><input type="text" name="sdv_3_7" id="sdv_3_7" value="" class="form-control font-weight-bold blue" autocomplete="dasdz423423" /></td>
+                    </tr>         
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="form-row mb-3 p-0 gcn_type_0">
+        <div class="form-group col-lg-3 col-md-12">
+            <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important; height: 100%">
+                <div class="form-group col-12">
+                    <h3 class="white mb-2">Accreditations</h3>
+                    <label for="gcn_org_code">Certification Body Code</label>
+                    <input type="text" name="gcn_org_code" id="gcn_org_code" value="" placeholder="Soil Association  / SOPA" class="form-control tuc" autocomplete="dasdz423423" />
+                </div>
+                <div class="form-group col-12">
+                    <label for="gcn_accred_1">Assured Produce No.</label>
+                    <input type="text" name="gcn_accred_1" id="gcn_accred_1" value="" class="form-control tuc" autocomplete="dasdz423423" />
+                </div>
+                <div class="form-group col-12">
+                    <label for="gcn_accred_2">..or.. GlobalGap No.</label>
+                    <input type="text" name="gcn_accred_2" id="gcn_accred_2" value="" class="form-control tuc" autocomplete="dasdz423423" />
+                </div>
+                <div class="form-group col-12">
+                    <label for="gcn_accred_3">LEAF 'Marque' No.</label>
+                    <input type="text" name="gcn_accred_3" id="gcn_accred_3" value="" class="form-control tuc" autocomplete="dasdz423423" />
+                </div>
+                <div class="form-group col-12">
+                    <label for="gcn_assessment_version">Waitrose Farm Assessment (version)</label>
+                    <input type="text" name="gcn_assessment_version" id="gcn_assessment_version" value="" class="form-control tuc" autocomplete="dasdz423423" />
+                </div>
+                <div class="form-group col-12">
+                    <label for="gcn_safe_haven">Seed 'Safe Haven'</label>
+                    <select name="gcn_safe_haven" id="gcn_safe_haven" class="form-control">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group col-lg-6 col-md-12">
+            <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important; height: 100%">
+                <div class="form-group col-12 align-top">
+                    <h3 class="white mb-1">Pre/Post Harvest Chemical Applications</h3>
+                    <p class="white mb-3">We confirm that legal Harvest Intervals (HI) have been adhered to for all pesticide products applied to this crop, in addition to the specific products that we request information for below. <span style="color: #edbb6e">Complete all appropriate entries.</span></p>
+                    <table class="BALTable mx-auto align-top" id="chem_used_table">                        
+                        <tr class="rem_chem_used_table">
+                            <td title="Last Application Date">Last Apply</td>
+                            <td class="ac" title="Harvest Interval">Harvest Int</td>
+                            <td class="ac" title="Application Amount (Per Ha or Tonne)">Amt</td>
+                        </tr>
+                        <tr class="rem_chem_used_table">
+                            <td colspan="3"><h3>skhsagdjksa</h3></td>
+                        </tr>
+                        <tr class="rem_chem_used_table">
+                            <td><input type="date" name="cu_appdate_0" id="cu_appdate_0" value="" class="form-control" autocomplete="dasdz423423" /></td>
+                            <td><input type="number" name="cu_harvint_0" id="cu_harvint_0" value="" class="form-control ac" autocomplete="dasdz423423"/></td>
+                            <td><input type="number" name="cu_amt_0" id="cu_amt_0" value="" class="form-control ac" autocomplete="dasdz423423" /></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <div class="form-group col-lg-3 col-md-12">
+            <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important; height: 100%">
+                <div class="form-group col-12 align-top d-inline-block">
+                    <h4 class="white mb-1">Other Chemicals monitored</h4>
+                    <p class="white mb-3">for residue testing reasons: <strong>Please tick if Yes</strong></p>
+                    <table class="BALTable align-top" id="chem_test_table">      
+                        <tr class="rem_chem_used_table">
+                            <td class="pr-1 nofold"></td>
+                            <td class="pr-1 nofold"><input type="checkbox" name="ct_apply_0" id="ct_apply_0" value="1" class="form-checkbox big_checkbox" /></td>
+                        </tr>                        
+                    </table>
+                    <div class="pl-1 pt-2">
+                        <label for="gcn_cipc"><strong>Has CIPC previously been used in the store?</strong></label>
+                        <select name="gcn_cipc" id="gcn_cipc" class="form-control">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                        <p class="mb-1 white pt-3">If this question has been marked YES, a residue test will be required to show compliance with the reduced CIPC MRL, this should be undertaken before the potatoes are delivered to the customer site.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+ 
+
+    <div class="form-row mb-3 p-10 pb-3 darkbg rounded hidepp_fin" style="background: #aaa!important;">
+        <div class="form-group col-12 mb-2">
+            <h3>Declaration/Terms</h3>
+            <div class="gcn_type_0">
+            <p class="mb-1">We also guarantee compliance with all relevant UK &amp; EU legislation relating to Food Safety including, but not limited to, the following:-</p>
+            <p class="mb-1">The Food &amp; Environmental Protection Act 1985, The Pesticides (Maximum Residue Levels) Regulations 2008, The Control of Pesticide Regulations SI No 1997 No. 188</p>
+            <p class="mb-1">EC Regulation 396/2005 and annexes, Regulation (EC) No. 1107/2009 and The Food Safety Act 1990: Sections 7, 8, 14 and amendments</p>
+            <p class="mb-1">Pesticide Residues in Food. Codex Alimentarius Commission Volume 2. Second Edition 1993 (adopted limits only) and amendments</p>
+            <p class="mb-1">Plant Protection Products Regulation 2011 (Great Britain and Northern Ireland)</p>
+            <p class="mb-2">UK Plant Protection Products (Sustainable Use) Regulations 2012 and Directive 2009/128/EC to regulate the sustainable use of pesticide in Europe</p>
+            <p class="mb-1">We confirm the bulker/boxes were sound and fit for the purpose, clean and free from foreign objects prior to loading.</p>
+            <p class="mb-1">The bulker/boxes were loaded in a safe manner without damage. The completed load so far as is reasonably practicable is free from foreign bodies.</p>
+            </div>
+            <div class="gcn_type_1">
+            <p class="mb-1">All seed is sold under the current BPTA Terms &amp; Conditions - available from the seller in writing on request or can be viewed at www.bpta.org.uk</p>
+
+            <p class="mb-1" id="trade_seed_terms_note"></p>
+
+            </div>
+            <p class="mb-3">* Organic crops must be grown in accordance with EC Regulations; (EC) 834/2007, (EC) 889/2008 &amp; (EC) 1235/2008.</p>
+            
+        </div>
+        
+        
+        <div class="form-group col-lg-3 col-md-12 pt-2" style="position: relative;">
+            <label for="signature" class="black">Signed [use finger or pointer] <a onClick="load_sig_default();" class="red" style="float: right;">Load Saved</a></label>
+            <div id="signature" class="black" style="border: 1px dashed #111;"></div>
+        </div>
+        <input type="hidden" value="" name="sigfile_this" id="sigfile_this">
+        
+        
+        
+        <div class="form-group col-lg-3 col-md-12" style="position: relative; margin-top: 80px; margin-bottom: 50px">
+            <label for="signature_driver" class="black">Driver Signature</label>
+            <div id="signature_driver" class="black" style="border: 1px dashed #111;"></div>
+        </div>
+        <input type="hidden" value="" name="sigfile_d_this" id="sigfile_d_this">
+        
+        <div class="mb-2 mt-2 ac">
+        <a onClick="capturePhoto(5, 22);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Photo Document</a>
+        </div>
+        
+        <div class="form-group col-lg-3 col-md-12">
+            <label for="gcn_sign_name" class="black">Your Name</label>
+            <input type="text" name="gcn_sign_name" id="gcn_sign_name" style="text-transform: uppercase" required value="" placeholder="Name of Person Completing form" class="form-control tuc is-required" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-3 col-md-12">
+            <label for="gcn_comments" class="black">Any additional comments?</label>
+            <textarea name="gcn_comments" id="gcn_comments" class="form-control"></textarea>
+        </div>
+        <div class="form-group col-lg-4 col-md-12 mt-1 pt-2">            
+            <label for="gcn_gogo" style="color: #ffffff!important;">I agree to the terms and declarations</label>
+            <div class="black pt-1">
+                <input type="checkbox" name="gcn_gogo" id="gcn_gogo" value="1" class="form-checkbox big_checkbox" />
+                <strong> I agree and confirm. This application is accurate &amp; complete</strong>.
+            </div>
+            
+            
+            <label for="sendtodriv" style="color: #ffffff!important;">Send to 'Haulier Contact' (when complete)</label>
+            <div class="black pt-1">
+                <input type="checkbox" name="sendtodriv" id="sendtodriv" value="1" class="form-checkbox big_checkbox" />
+            </div>
+            
+            <label for="sendcopy" style="color: #ffffff!important;">Send to 'Myself' (when complete)</label>
+            <div class="black pt-1">
+                <input type="checkbox" name="sendcopy" id="sendcopy" value="1" class="form-checkbox big_checkbox" />
+            </div>
+            
+            
+            <div class="grey mt-2"><span class="black">Last Update:</span> <span id="gcn_last_update"></span></div>
+            <h3 class="red font-weight-bold">You can save this, and complete later. It will close and submit once you have agreed to the terms.</h3>
+        </div>
+        
+    </div>
+</div>                       
+</form>                     
+                        
+                        
+                        
+                        
+                        
+                        <div class="form-group col-md-12 col-lg-12 text-center hidepp_fin">
+                            <button id="submit_passport" class="but_red" onClick="save_passport();" name="submit_passport">Save Passport</button>
+                        </div>
+                    </div>
+
+            </div>
+		</div>
+
+</div>	
+	
+<div data-role="page" id="page_custcons">
+<div data-role="header" class="top_nav" data-position="fixed">
+<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Ware Contracts and Orders</h1>
+</div>    
+
+<div data-role="content" id="cc_form">
+<div class="p-1">
+
+<h1 class="white p-2 mt-2" id="cc_name" style="line-height: 1em;">Customer Name</h1>	
+
+<h3 class="white p-2 my-2" id="cc_contact"></h3>    
+
+<div class="form px-0 pb-2 mt-2">
+     
+    
+    
+<div class="form-row mb-3 p-10 darkbg rounded" style="background: #81756e!important; height: 100%; display: none;" id="vend_seed_orders">
+    <div class="form-group col-12 align-top d-inline-block">
+        <h1>Requested Seed Orders</h1>
+        <p>Once confimed and accepted, Order progress will display below, in the appropriate Contract area or Free-buy section.</p>
+<!--wp_order_div
+{
+"ContractNo": "W420347",
+"id": "1",
+"wc_date": "2023-10-01 08:42:27",
+"wc_o_type": "1",
+"wc_seed_size": "92",
+"wc_tonnes": "208.00",
+"wc_seed_rate": "2.5",
+"wc_area": "83.00",
+"wc_shipping": "1",
+"wc_wn": "14",
+"user name": "MarkM",
+"p_desc": "Bag 1.25T E-Lift (Branded)",
+"a1": "Hermitage Farm",
+"town": "Ely",
+"region": "Cambridgeshire",
+"variety_name": "Royal",
+"size_name": "35x45x55mm"
+}-->
+        <div class="pb-2">
+            <div id="wp_order_div">
+            <table style="width:100%; font-size: 1em" class="mt-1 mb-3" border="2" bordercolor="#51453F" cellspacing="5" cellpadding="5">	
+                <tr>
+                    <td class="td_dark" title="id"><strong>W420347</strong></td>
+                    <td class="td_dark"><div style="float:right">wc_date</div></td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Variety</td>
+                    <td class="bold td_brown">variety_name</td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Required</td>
+                    <td class="bold td_brown">2023-10-01 [WK:wc_wn]</td>
+                </tr>                               
+                <tr>
+                    <td class="bold td_green">Tonnes</td>
+                    <td class="bold td_brown">wc_tonnes</td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Size</td>
+                    <td class="bold td_brown" title="wc_seed_size">size_name</td>
+                </tr> 
+                <tr>
+                    <td class="bold td_green">Area</td>
+                    <td class="bold td_brown">wc_o_type wc_area</td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Packaging</td>
+                    <td class="bold td_brown">p_desc</td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Ship Type</td>
+                    <td class="bold td_brown">wc_shipping</td>
+                </tr>
+                <tr>
+                    <td class="bold td_green">Ship To</td>
+                    <td class="bold td_brown">a1 | town | region | postcode</td>
+                </tr>
+            </table>   
+            
+            </div>
+
+        </div>
+    </div>
+</div>
+    
+<div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important; height: 100%">
+    <div class="form-group col-12 align-top d-inline-block">
+        <h1>Active Contracts &amp; Orders</h1>
+        <div class="pb-2" id="my_contracts">
+        <table style="width:100%; font-size: 1em" class="mt-1 mb-3" border="2" bordercolor="#707993" cellspacing="5" cellpadding="5">	
+           
+        </table>    
+        </div>
+    </div>
+    
+    
+<form id="sconform" style="padding: 0px; background: transparent; width: 100%;"> 
+    <div class="form-row mb-3 p-20 darkbg rounded" style="background: #455362!important;">
+              
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <h1>Offer a Contract</h1>
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="oc_var_id">Variety</label>
+            <select name="oc_var_id" id="oc_var_id" class="form-control">   
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="oc_o_type">Type</label>
+            <select name="oc_o_type" id="oc_o_type" class="form-control">
+                <option value="0">Tonnes</option>
+                <option value="1">Area</option>     
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="oc_area_tns">Area (h) or Tonnes (t)</label>
+            <input type="number" min="0" max="5000" step="0.1" name="oc_area_tns" id="oc_area_tns" value="" class="form-control" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="oc_deliver_date">Factory Delivery Date (Est.)</label>
+            <input type="date" class="form-control" name="ac_deliver_date" id="oc_deliver_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" min="2023-10-02" />
+        </div>
+
+        <div class="form-group col-lg-3 col-md-12 mb-3">
+            <label for="oc_notes">Any additional comments?</label>
+            <textarea name="oc_notes" id="oc_notes" class="form-control"></textarea>
+        </div>
+        
+
+        <div class="form-group col-lg-3 col-md-12 text-center">
+            <button id="submit_con_sug" class="but_red" onClick="save_consug_order();" name="submit_con_sug">Submit Contract Suggestion</button>
+        </div>
+    </div>
+</form>    
+  
+    
+</div>
+    
+    
+
+    
+    
+    
+    
+    
+<form id="cconform" style="padding: 0px; background: transparent; width: 100%; display:none;"> 
+    <div class="form-row mb-3 p-20 darkbg rounded" style="background: #827487!important;">
+       
+       
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <h1>Add a Seed Order</h1>
+        </div> 
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_con_id">Contract No / Free-Buy</label>
+            <select name="wc_con_id" id="wc_con_id" class="form-control">
+                <option value="0">Select...</option>   
+                <option value="0">Free-Buy</option>    
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12" id="cvarhide">
+            <label for="wc_var_id">Variety</label>
+            <select name="wc_var_id" id="wc_var_id" class="form-control">
+                <option value="0">Select...</option>
+                <option value="0">Tonnes</option>    
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_o_type">Type [Tonnes or Area?]</label>
+            <select name="wc_o_type" id="wc_o_type" class="form-control">
+                <option value="0">Tonnes</option>
+                <option value="1">Area</option>     
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_seed_size">Seed Size</label>
+            <select name="wc_seed_size" id="wc_seed_size" class="form-control">
+                <option value="0">Select...</option>
+                <option value="35x45x55">35x45x55</option>   
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_pack_id">Packaging</label>
+            <select name="wc_pack_id" id="wc_pack_id" class="form-control">
+                <option value="-1">Select...</option>
+                <option value="35x45x55">35x45x55</option>   
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="wc_area">Area (h) [If known]</label>
+            <input type="number" min="0" max="5000" step="0.01" name="wc_area" id="wc_area" value="" class="form-control" autocomplete="dasdz423423" />
+        </div>
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="wc_tonnes">Seed Tonnes [If known]</label>
+            <input type="number" min="0" max="5000" step="0.01" name="wc_tonnes" id="wc_tonnes" value="" class="form-control" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+            <label for="wc_seed_rate">Seed Rate [if known]</label>
+            <input type="number" min="0" max="5000" step="0.01" name="wc_seed_rate" id="wc_seed_rate" value="" class="form-control" autocomplete="dasdz423423" />
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_shipping">Delivery Option</label>
+            <select name="wc_shipping" id="wc_shipping" class="form-control">
+                <option value="0">Select...</option>
+                <option value="1">Delivered</option>
+                <option value="2">Ex Farm</option>
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_deliver_address">Delivery Address</label>
+            <select name="wc_deliver_address" id="wc_deliver_address" class="form-control">
+                <option value="0">Select...</option>
+                <option value="1">Delivered</option>
+                <option value="2">Ex Farm</option>
+            </select>  
+        </div>
+        
+        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+            <label for="wc_deliver_date">Required Date [Est]</label>
+            <input type="date" class="form-control" name="wc_deliver_date" id="wc_deliver_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" min="2023-10-02" />
+        </div>
+
+        <div class="form-group col-lg-3 col-md-12">
+            <label for="wc_notes">Any additional comments?</label>
+            <textarea name="wc_notes" id="wc_notes" class="form-control"></textarea>
+        </div>
+        
+        
+        
+        <div class="form-group col-lg-4 col-md-12 mt-3 pt-3">
+            <h3 class="red font-weight-bold">Please ensure your entries are correct.</h3>
+        </div>
+        <div class="form-group col-lg-3 col-md-12 text-center">
+            <button id="submit_seed_ord" class="but_red" onClick="save_seed_order();" name="submit_seed_ord">Submit Seed Order</button>
+        </div>
+    </div>
+</form>
+    
+    
+    
+    
+    
+    
+    
+
+</div>                       
+                    
+                        
+                        
+
+
+            </div>
+		</div>
+
+</div>
+    
+    
+    
+    
+    
+<div data-role="page" id="page_box_in_form">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1>Boxes In</h1>
+		</div>
+
+		<div data-role="content" id="boxinform_form">
+            <div class="p-2">
+
+               
+<div class="form-row mb-0 p-2 my-2">
+<h1 class="white">Report - Boxes In/Out Manual</h1>
+<h4 class="pb-2">If Boxes arrive at or leave farm by arrangment, and are not part of a pickup exchange, you can add them here. If they are part of a pickup, use the passport to record IN/OUT boxes.</h4>  
+    
+<form id="boxinform" style="padding: 0px; background: transparent; width: 100%;">
+<div class="form px-0 pb-2">
+    
+    <div class="form-row mb-3 p-4 darkbg rounded" style="background: #83815f!important; width: 100%; box-sizing: border-box;">
+        
+       
+           <table class="BALTable mx-auto align-top" style="width: 100%; margin-bottom: 20px;">                        
+                <tr>
+                    <td>Box Mark</td>
+                    <td class="ac">Boxes #</td>
+                </tr> 
+                <tr>
+                    <td style="width: 70%"><input type="text" name="bxin_mark_1" id="bxin_mark_1" value="" class="form-control" placeholder="Box Mark 1" autocomplete="dasdz423423" style="text-transform: uppercase"/></td>
+                    <td><input type="number" name="bxin_cnt_1" id="bxin_cnt_1" value="" max="60" class="form-control ac" autocomplete="dasdz423423" /></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="bxin_mark_2" id="bxin_mark_2" value="" class="form-control" placeholder="Box Mark 2" autocomplete="dasdz423423" style="text-transform: uppercase"/></td>
+                    <td><input type="number" name="bxin_cnt_2" id="bxin_cnt_2" value="" max="60" class="form-control ac" autocomplete="dasdz423423" /></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="bxin_mark_3" id="bxin_mark_3" value="" class="form-control" placeholder="Box Mark 3" autocomplete="dasdz423423" style="text-transform: uppercase"/></td>
+                    <td><input type="number" name="bxin_cnt_3" id="bxin_cnt_3" value="" max="60" class="form-control ac" autocomplete="dasdz423423" /></td>
+                </tr>
+               
+                <tr>
+                    <td colspan="2" style="padding: 15px 0px">
+                    <h3 class="white">Choose carefully</h3>
+                    <input type="radio" name="bxin_type" id="bxin_type1" checked value="1">
+                    <label for="bxin_type1" class="white">Arriving [Return by Haulier]</label>
+                    <div style="margin: 20px; display: block"></div>
+                    <input type="radio" name="bxin_type" id="bxin_type0" value="0">
+                    <label for="bxin_type0" class="white" style="background: #667997">Leaving Farm [By arrangement]</label>
+                    </td>
+                </tr>
+               
+                <tr>
+                    <td colspan="2">
+                    <label for="bxin_date" class="white">Date Boxes Returned/Left [blank if today]</label>
+                    <input type="date" class="form-control" name="bxin_date" id="bxin_date" placeholder="dd/mm/yyyy" value="" data-rule="date" data-msg="Please enter a valid date" min="2024-01-01" style="background: #cdb3b3" />    
+                    </td>
+                </tr>
+               
+               
+                <tr>
+                    <td colspan="2">
+                    <label for="bxin_haulier" class="white">Haulier</label>
+                    <input type="text" name="bxin_haulier" id="bxin_haulier" value="" class="form-control"  autocomplete="dasdz423423" style="text-transform: uppercase" />
+                    </td>
+                </tr>
+               
+               <tr>
+                    <td colspan="2">
+                    <label for="bxin_customer_name" class="white">Customer ['from' or 'going to'] if known.</label>
+                    <input type="text" name="bxin_customer_name" id="bxin_customer_name" value="" class="form-control" autocomplete="dasdz423423" />
+                    </td>
+                </tr>
+               
+                <tr>
+                    <td colspan="2">
+                    <label for="bxin_vehicle" class="white">Vehicle Reg/Number</label>
+                    <input type="text" name="bxin_vehicle" id="bxin_vehicle" value="" class="form-control"  autocomplete="dasdz423423" style="text-transform: uppercase" />
+                    </td>
+                </tr>
+               
+                <tr>
+                    <td colspan="2">
+                    <label for="bxin_comments" class="white">Any additional comments?</label>
+                    <textarea name="bxin_comments" id="bxin_comments" class="form-control"></textarea>
+                    </td>
+                </tr>
+               
+            </table>
+      
+            <a class="foot_icon home" onclick="backhome(1);">Back Home</a>
+
+            
+  
+
+    </div>
+
+
+</div>                       
+</form>                     
+                        
+                        
+                        
+                        
+
+    <div class="form-group col-md-12 col-lg-12 text-center">
+        <button id="submit_boxes_in" class="but_red" onClick="submit_boxes_in();" name="submit_boxes_in">Submit Boxes In</button>
+    </div>
+</div>
+
+            </div>
+		</div>
+
+</div>	
+	    
+    
+
+	
+	
+	
+<div data-role="page" id="page_error" style="background: #372F28;">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1 class="page_crop_head_h1">Error!</h1>
+		</div>
+		<div data-role="content">
+			<div class="p-10">
+				<h1>Sync Error</h1>
+				<p>Please copy this error and send to: <a href="mailto:dig@tayfusion.com">dig@tayfusion.com</a></p>
+				<div class="form_container ac" style="display: none">
+					<div>
+					<textarea class="form-control" name="error_text" style="height: auto !important;" rows="18" id="error_text"></textarea>	
+					</div>		
+				</div>				
+			</div>				
+		</div>
+</div>	
+	
+	
+	
+
+
+	
+	
+
+	
+
+
+		
+	
+<script src="js/jquery-2.2.4.min.js"></script>
+<script src="js/jquery.mobile-1.4.5/jquery.mobile-1.4.5.js"></script>
+<script src="js/jSignature.min.js"></script>    
+<script src="app.js" defer></script>
+<script>
+function gmNoop(){
+    //coz google maps is tedious!
+    console.log('GMap Callback');
+}    
+</script>    
+    
+    
+</body>
+</html>
