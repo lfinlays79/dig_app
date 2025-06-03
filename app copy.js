@@ -182,7 +182,7 @@ function showPosition(position) {
 		
 		
 		create_db = evt.currentTarget.result.createObjectStore('podat_crops', { keyPath: 'id', autoIncrement: true });
-		colarr = ["merc_id", "gid", "CropNo", "latlng_json", "marker_json", "Grower", "FarmName", "FID", "FieldGeneration", "Variety", "varietyid", "EntryUnionGrade", "AttainedUnionGrade", "BoxCount", "e3555", "eTotal", "eStartTotal", "allocated_quant", "dispatched_quant", "Quantity", "CropRating", "TestDigRating", "StoreRating", "DatePlanted", "BurnDate", "HarvestDate", "DateHerb", "LatLong", "geo_temp", "eWare", "allocated_quant_s", "allocated_quant_w", "dispatched_quant_s", "dispatched_quant_w", "purc_id", "field_name", "ImActive", "syear", "thisornext"];
+		colarr = ["merc_id", "gid", "CropNo", "Grower", "FarmName", "FID", "FieldGeneration", "Variety", "varietyid", "EntryUnionGrade", "AttainedUnionGrade", "BoxCount", "e3555", "eTotal", "eStartTotal", "allocated_quant", "dispatched_quant", "Quantity", "CropRating", "TestDigRating", "StoreRating", "DatePlanted", "BurnDate", "HarvestDate", "DateHerb", "LatLong", "geo_temp", "eWare", "allocated_quant_s", "allocated_quant_w", "dispatched_quant_s", "dispatched_quant_w", "purc_id", "field_name", "ImActive", "syear", "thisornext"];
 		colLn = colarr.length;
 		for (i = 0; i < colLn; i++) {
 			create_db.createIndex(colarr[i], colarr[i], { unique: false });
@@ -1632,10 +1632,11 @@ function get_crop_data_gogo(){
 											FID = clean_quotes(rz[z]['FID']);
 											Variety = clean_quotes(rz[z]['Variety']);
 											FieldGeneration = clean_quotes(rz[z]['FieldGeneration']);
-
-							        
+							
 									
-											var obj = {merc_id: merch_id, gid: rz[z]['id'], CropNo: CropNo, latlng_json:rz[z]['latlng_json'], marker_json:rz[z]['marker_json'], Grower: Grower, FarmName: FarmName, FID: FID, FieldGeneration: FieldGeneration, Variety: Variety, varietyid: rz[z]['variety_id'], EntryUnionGrade: rz[z]['EntryUnionGrade'], AttainedUnionGrade: rz[z]['AttainedUnionGrade'], BoxCount: rz[z]['BoxCount'], e3555: rz[z]['e3555'], eTotal: rz[z]['eTotal'], eStartTotal: rz[z]['eStartTotal'], allocated_quant: rz[z]['allocated_quant'], dispatched_quant: rz[z]['dispatched_quant'], Quantity: rz[z]['Quantity'], CropRating: rz[z]['CropRating'], TestDigRating: rz[z]['TestDigRating'], StoreRating: rz[z]['StoreRating'], DatePlanted:rz[z]['DatePlanted'], BurnDate:rz[z]['BurnDate'], HarvestDate:rz[z]['HarvestDate'],DateHerb:rz[z]['DateHerb'], LatLong:rz[z]['LatLong'], geo_temp:rz[z]['geo_temp'], eWare:rz[z]['eWare'], allocated_quant_s:rz[z]['allocated_quant_s'], allocated_quant_w:rz[z]['allocated_quant_w'], dispatched_quant_s:rz[z]['dispatched_quant_s'], dispatched_quant_w:rz[z]['dispatched_quant_w'], purc_id:rz[z]['purchase_id'], field_name:rz[z]['field_name'], ImActive:0, syear:rz[z]['syear'], thisornext:$("#get_crop_ns").val() };	
+											
+									
+											var obj = {merc_id: merch_id, gid: rz[z]['id'], CropNo: CropNo, Grower: Grower, FarmName: FarmName, FID: FID, FieldGeneration: FieldGeneration, Variety: Variety, varietyid: rz[z]['variety_id'], EntryUnionGrade: rz[z]['EntryUnionGrade'], AttainedUnionGrade: rz[z]['AttainedUnionGrade'], BoxCount: rz[z]['BoxCount'], e3555: rz[z]['e3555'], eTotal: rz[z]['eTotal'], eStartTotal: rz[z]['eStartTotal'], allocated_quant: rz[z]['allocated_quant'], dispatched_quant: rz[z]['dispatched_quant'], Quantity: rz[z]['Quantity'], CropRating: rz[z]['CropRating'], TestDigRating: rz[z]['TestDigRating'], StoreRating: rz[z]['StoreRating'], DatePlanted:rz[z]['DatePlanted'], BurnDate:rz[z]['BurnDate'], HarvestDate:rz[z]['HarvestDate'],DateHerb:rz[z]['DateHerb'], LatLong:rz[z]['LatLong'], geo_temp:rz[z]['geo_temp'], eWare:rz[z]['eWare'], allocated_quant_s:rz[z]['allocated_quant_s'], allocated_quant_w:rz[z]['allocated_quant_w'], dispatched_quant_s:rz[z]['dispatched_quant_s'], dispatched_quant_w:rz[z]['dispatched_quant_w'], purc_id:rz[z]['purchase_id'], field_name:rz[z]['field_name'], ImActive:0, syear:rz[z]['syear'], thisornext:$("#get_crop_ns").val() };	
 											//docall=1;
 											docall = go_insert_('podat_crops', obj);
 									
@@ -3815,7 +3816,23 @@ function fill_crop_detail(rz){
     
         crop_words = rz.CropNo+"^"+rz.Variety+"^"+rz.FarmName+"^"+rz.field_id+"^"+rz.FID+"^"+rz.Quantity;
 
-  
+    
+        /*
+        if(rz.LatLong.length<10 && rz.geo_temp!='' && rz.geo_temp!= undefined && rz.geo_temp.length>10){
+            //use basic chords...
+            
+            rz.geo_temp = rz.geo_temp.replace(/\s/g,'');
+            
+            rz.LatLong = '('+rz.geo_temp+')';
+            
+            geotemp = rz.geo_temp.split(",");
+            //consol e.log('rz.geo_temp', rz.geo_temp, geotemp);
+            p_lat = geotemp[0].trim();
+            p_long = geotemp[1].trim(); 
+        
+        }*/
+    
+    
     
         if(rz.LatLong && rz.LatLong.length>10){
             myll = rz.LatLong;
