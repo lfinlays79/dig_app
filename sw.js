@@ -115,7 +115,7 @@ self.addEventListener('fetch', function (event)
 	if (event.request.method.toUpperCase() == 'POST') {
 		console.info('[Service Worker] Ignore Post');
 		// return;
-		event.respondWith(fetch(event.request);
+		event.respondWith(fetch(event.request));
 	}
 
 	if (event.request.url.match(/^.*\/dig_app\/[\w]*\.(?:js|html)$/)) 

@@ -1325,7 +1325,7 @@ function go_check_key(){
         
         //if(digurl=='www.tayfusion.com'){dg folder = 'dig-demo';}else{dg folder = 'dig';}
 		//$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/"+dg folder+"/dig_mobxxx/db_auth_usr.php", success: function(data){
-				$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
+				$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "http://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
 
 					if(data=='404'){
 						alert('Sorry no match found, please try again [1]');
@@ -1370,7 +1370,7 @@ function go_check_key(){
             //consol e.log('digurl',digurl);
 		        //if(digurl=='www.tayfusion.com'){dg folder = 'dig-demo';}else{dg folder = 'dig';} 
                 //$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/"+dg folder+"/dig_mobxxx/db_auth_usr.php", success: function(data){
-				$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
+				$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "http://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
 
 					if(data=='404' || data==0){
 						alert('Sorry, no match found, please try again. [2]:'+data);
@@ -1432,7 +1432,7 @@ function load_user(mcid){
 				merch_id = urow.merc_id;
 				aid = urow.aid;
 				userkey = urow.userkey;
-                mobSysURL = 'https://'+urow.digurl+'/';
+                mobSysURL = 'http://'+urow.digurl+'/';
 				
 				username = urow.username;
 				remote_type = urow.remote_type;
@@ -3840,26 +3840,14 @@ function fill_crop_detail(rz){
 		$("#pdd").html('');$("#bdd").html('');$("#hdd").html('');$("#brd").html('');
     
     
+
+
+    /////////////////////////////// TODO FROM HERE //////////////////////////////////
     
         crop_words = rz.CropNo+"^"+rz.Variety+"^"+rz.FarmName+"^"+rz.field_id+"^"+rz.FID+"^"+rz.Quantity;
 
-    
-        /*
-        if(rz.LatLong.length<10 && rz.geo_temp!='' && rz.geo_temp!= undefined && rz.geo_temp.length>10){
-            //use basic chords...
-            
-            rz.geo_temp = rz.geo_temp.replace(/\s/g,'');
-            
-            rz.LatLong = '('+rz.geo_temp+')';
-            
-            geotemp = rz.geo_temp.split(",");
-            //consol e.log('rz.geo_temp', rz.geo_temp, geotemp);
-            p_lat = geotemp[0].trim();
-            p_long = geotemp[1].trim(); 
-        
-        }*/
-    
-    
+        let latlng_json = rz.latlng_json;
+        let marker_json = rz.marker_json;
     
         if(rz.LatLong && rz.LatLong.length>10){
             myll = rz.LatLong;
@@ -3880,8 +3868,13 @@ function fill_crop_detail(rz){
         if(navigator.onLine){
             iamcon = 1;
         }
-        load_map(triangleCoords, crop_words, iamcon);
+        load_map(latlng_json, marker_json, triangleCoords, crop_words, iamcon);
 		
+/////////////////////////////// TODO TO HERE //////////////////////////////////
+
+
+
+
 		if(rz.DatePlanted!='' && rz.DatePlanted){			
 			if(rz.DatePlanted.length==10){
                 $("#the_plant_date").val(rz.DatePlanted);
@@ -4359,6 +4352,9 @@ function fill_crop_detail(rz){
 
 
 
+
+
+
 function get_inspection_notes_from_server(xgid){
 
     
@@ -4782,6 +4778,13 @@ function save_the_dates(){
 
 
 function load_crop_map(){
+
+
+
+
+
+
+
 	//db.transaction(function(tx){tx.executeSql("DELETE FROM podat_ inspections WHERE myuid='NEW'",[],successCallBack, errorHandler);},errorHandler,successCallBack);
 	if(!isNaN(igid) && igid>0){
 		$.mobile.changePage( "#page_cmap", { transition: "flip"});
@@ -6939,234 +6942,6 @@ function go_syncgo(){
 
 	
 }
-
-
-
-
-
-
-
-    /**/           
-            //locovar = position.coords.latitude+','+position.coords.longitude;
-            var map; // Global declaration of the map
-            var iw;
-            //var iw = new google.maps.InfoWindow(); // Global declaration of the infowindow
-            var lat_longs = new Array();
-            var markers = new Array();
-            var drawingManager;
-            var all_overlays = [];
-            var imdrawing = 0;
-            var newShape;
-            
-            
-
-            function initialize(plat, plong, tchords, crop_words) {
-                var tpoints = [];  
-                $('#save_poly_map').closest('.ui-btn').hide();
-
-                //set start L&L to the first poly poss
-                if(tchords.length>2){
-                    plat = tchords[0][0];
-                    plong = tchords[0][1];
-                    
-                for (var i = 0; i < tchords.length; i++) {
-                    tpoints.push({
-                        lat: tchords[i][0],
-                        lng: tchords[i][1]
-                    });                    
-                }    
-                    
-                }
-                
-                
-                
-                
-
-                var infopos = { lat: plat, lng: plong }; 
-                var myLatlng = new google.maps.LatLng(plat, plong);
-                var myOptions = {
-                    zoom: 16,
-                    center: myLatlng,
-                    mapTypeId: google.maps.MapTypeId.SATELLITE
-                }
-              
-              
-            
-
-            
-              
-
-            //consol e. log(triangleCoords);
-
-                
-              
-              map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
-              drawingManager = new google.maps.drawing.DrawingManager({
-                drawingMode: google.maps.drawing.OverlayType.POLYGON,
-                drawingControl: true,
-                drawingControlOptions: {
-                  position: google.maps.ControlPosition.TOP_CENTER,
-                  drawingModes: [google.maps.drawing.OverlayType.POLYGON]
-                },
-                polygonOptions: {
-                    editable: true,
-                    fillColor: "#ffff00",
-                    strokeColor: "#3B8C3B"
-                }
-              });
-              drawingManager.setMap(null);
-                
-                
-                /*
-              g oogle.m aps.e vent.add Listener(drawingManager, "overlaycomplete", function(event) {
-                newShape = event.overlay;
-                newShape.type = event.type;
-              });*/
-
-              google.maps.event.addListener(drawingManager, "overlaycomplete", function(event) {
-                overlayClickListener(event.overlay);
-                all_overlays = event.overlay.getPath().getArray();  
-                $('#vertices').val(all_overlays);
-                area_mypoly = google.maps.geometry.spherical.computeArea(event.overlay.getPath());
-                area_mypoly = (area_mypoly/10000).toFixed(3);
-                //ale rt(area_mypoly+' Hec');
-                $('#map_area_val').html('Area: '+area_mypoly);  
-                  
-                newShape = event.overlay;
-                newShape.type = event.type;
-                  
-                //$('#save_poly_map').closest('.ui-btn').show();  
-              });
-                
-            google.maps.event.addListener(map, "mouseup", function(event) {
-                if(imdrawing==0){
-                  //imdrawing=1; 
-                  //overlayRemoveAll(); 
-                }
-                //ale rt('dmc');
-            });
-            
-                
-                
-              newPolys = new google.maps.Polygon({
-                path: tpoints,
-                fillColor: "#0E30D8",
-                strokeColor: "#FFFFFF"
-              });
-              newPolys.setMap(map); 
-                
-        
-
-            ///if we have an area????
-            if(tchords.length>2){
-                    var area_mypoly = google.maps.geometry.spherical.computeArea(newPolys.getPath());                 
-
-                    //crop_words = rz.CropNo+"/"+rz.Variety+"/"+rz.Farm Name+"/"+rz.field_ name+"/"+rz.FID+"/"+rz.Quantity;
-                    crop_words_arr = crop_words.split("^");                
-                    area_mypoly = (area_mypoly/10000).toFixed(3);
-                    contentString =
-                    '<div id="content">' +
-                    '<h4 class="mb-0"><strong class="green">'+crop_words_arr[0]+'</strong></h4>' +
-                    '<h5 class="mb-0 dark">'+crop_words_arr[1]+' - '+crop_words_arr[2]+'</h5>' +
-                    '<h5 class="mb-0 dark">'+crop_words_arr[3]+'</h5>' +
-                    '<h5 class="mb-0 dark">Area: '+crop_words_arr[4]+' | Calulated: '+area_mypoly+'</h5>' +      
-                    "</div>";
-                
-                
-                    $('#map_area_val').html('Area: '+area_mypoly);
-
-                    iw = new google.maps.InfoWindow({
-                    content: contentString
-                    });
-                    const marker = new google.maps.Marker({
-                    position: infopos,
-                    map,
-                    title: crop_words_arr[0],
-                    });
-             
-                    marker.setVisible(false);
-                    iw.open(map, marker);
-         
-                    
-  
-                
-            /**/
-            }
-
-                
-      
-                
-
-            function overlayClickListener(overlay) {///happens at poly close!
-                //ale rt('ocl');
-                $('#save_poly_map').closest('.ui-btn').show();
-                google.maps.event.addListener(overlay, "mouseup", function(event) {
-                    all_overlays = overlay.getPath().getArray();
-                    $('#vertices').val(all_overlays);
-                    
-                });
-            }
-            
-                
-            function overlayRemoveAll(stopdraw=0) {
-                $('#save_poly_map').closest('.ui-btn').hide();
-                $('#map_area_val').html('');
-                if(stopdraw==1){
-                    drawingManager.setMap(null);
-                }else{
-                    drawingManager.setMap(map);
-                }
-                if(newShape){
-                    newShape.setEditable(false);
-                    newShape.setMap(null);
-                    newShape = null;
-                }
-                newPolys.setEditable(false);
-                newPolys.setMap(null);
-                newPolys = null;
-                $('#vertices').val('');
-                all_overlays = [];
-                iw.close(map);
-                
-                
-                
-            } 
-
-
-            
-               
-                $('#map_form #clear').click(function() {
-                    overlayRemoveAll();
-                });                
-               
-                
-                $('#my_poss').click(function() {
-                    mypos = new google.maps.LatLng(p_lat,p_long); 
-                    map.setCenter(mypos);
-                });
-                
-     
-}///end init
-
-
-            
-
-            function load_map(poly_str, cropwords, iamcon=0) {
-                //consol e.log('load_map', p_lat,p_long);
-                //56.4610883,-3.0520755|56.4611879,-3.0520827|56.4612381,-3.0515727|56.4624951,-3.052249|56.4625707,-3.0523546|56.4625587,-3.0521796|56.4623756 - first mob test
-                ///init on page load (second page) use current L&L if we dont have a field poly
-                if(iamcon==1){
-                    $('#map-canvas-all').show();                    
-                    google.maps.event.addListener(window, 'load', initialize(p_lat, p_long, poly_str, cropwords));//was addDomListener
-                                
-                    
-                }else{
-                    ///hide the map
-                    $('#map-canvas-all').hide();
-                }    
-            } 
-
-
 
 
 

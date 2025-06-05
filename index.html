@@ -393,34 +393,30 @@
 					</div>
 
 				</div>
-				
-                <div class="a_box rounded mt-3 mb-4" id="map-canvas-all">
-                    <div class="form-row mt-2 mb-3">	
-				    <h1 class="mb-1 lh14 p-0">Field Map</h1>
-                    <h3 class="white p-0" id="cd_FID">FID?</h3>    
-                    <div id="map-canvas" class="mb-4" style="height: 600px; width:100%; margin: 0px; padding: 0px"></div>
-                        
+        
+<!--
 
-                    
-                    <div id="map_form" class="text-center"> 
-                        <div class="white mb-2 h2 ac" id="map_area_val"></div>
-                        <div class="dts_saved_div bggreen mb-1 mt-23 p-6 ac" style="display: none">Saved. Will send to DIG at next sync</div>
-                        <input type="button" name="save_poly_map" value="Save Map" id="save_poly_map" onClick="save_the_dates();" />
-                        <input type="button" class="btn but_blue ml-2" name="clear" value="Clear &amp; Start Mapping" id="clear" />
-                        <input type="button" class="but_red ml-2" name="my_poss" value="My Position" id="my_poss" />
+              <div class="a_box rounded mt-3 mb-4" id="map-canvas-all">
+                <div class="form-row mt-2 mb-3">	
+				          <h1 class="mb-1 lh14 p-0">Field Map</h1>
+                  <h3 class="white p-0" id="cd_FID">FID?</h3>    
+                  <div id="map-canvas" class="mb-4" style="height: 600px; width:100%; margin: 0px; padding: 0px"></div>
+                         
+                  <div id="map_form" class="text-center"> 
+                    <div class="white mb-2 h2 ac" id="map_area_val"></div>
+                    <div class="dts_saved_div bggreen mb-1 mt-23 p-6 ac" style="display: none">Saved. Will send to DIG at next sync</div>
+                    <input type="button" name="save_poly_map" value="Save Map" id="save_poly_map" onClick="save_the_dates();" />
+                    <input type="button" class="btn but_blue ml-2" name="clear" value="Clear &amp; Start Mapping" id="clear" />
+                    <input type="button" class="but_red ml-2" name="my_poss" value="My Position" id="my_poss" />
+                                                        
+                    <div><strong class="red" id="locovarmap"></strong></div>
                         
-                        
+                    <input type="hidden" value="" name="vertices" id="vertices">
+                  </div>           
 
-
-                        
-                        <div><strong class="red" id="locovarmap"></strong></div>
-                        
-                        <input type="hidden" value="" name="vertices" id="vertices">
-                    </div>           
-
-                    </div>    
-                </div>
-				
+                </div>    
+              </div>
+            -->
 				
 			</div>	
 		</div>
@@ -452,10 +448,32 @@
 
 			<div class="p-6">
 
+              <div class="a_box rounded mt-3 mb-4" id="map-canvas-all">
+                <div class="form-row mt-2 mb-3">	
+				          <h1 class="mb-1 lh14 p-0">Field Map</h1>
+                  <h3 class="white p-0" id="cd_FID">FID?</h3>    
+                  <div id="map-canvas" class="mb-4" style="height: 600px; width:100%; margin: 0px; padding: 0px"></div>
+                        
 
-				<h1 style="font-size: 2em;" class="mb-2">Crop Map</h1>
-                dasdasdsa
+                    
+                  <div id="map_form" class="text-center"> 
+                    <div class="white mb-2 h2 ac" id="map_area_val"></div>
+                    <div class="dts_saved_div bggreen mb-1 mt-23 p-6 ac" style="display: none">Saved. Will send to DIG at next sync</div>
+                    <input type="button" name="save_poly_map" value="Save Map" id="save_poly_map" onClick="save_the_dates();" />
+                    <input type="button" class="btn but_blue ml-2" name="clear" value="Clear &amp; Start Mapping" id="clear" />
+                    <input type="button" class="but_red ml-2" name="my_poss" value="My Position" id="my_poss" />
+                        
+                        
 
+
+                        
+                    <div><strong class="red" id="locovarmap"></strong></div>
+                        
+                    <input type="hidden" value="" name="vertices" id="vertices">
+                  </div>           
+
+                </div>    
+              </div>
 			</div>
 			
 			
@@ -3143,7 +3161,7 @@
 <script src="js/jquery.mobile-1.4.5/jquery.mobile-1.4.5.js"></script>
 <script src="js/jSignature.min.js"></script>    
 <script src="app.js" defer></script>
-
+<script src="app_map.js" defer></script>
     
     
 </body>
