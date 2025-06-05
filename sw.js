@@ -19,6 +19,7 @@ var appShellFiles = [
 	'/dig_app/img/ico_inspec.png',
 	'/dig_app/img/app_icon_testdig.png',
 	'/dig_app/img/app_icon_home.png',
+  '/dig_app/img/app_icon_map.png',
 	'/dig_app/img/arrow_r.png',
 	'/dig_app/img/arrow_r_l.png',
 	'/dig_app/img/arrow_r_r.png',
@@ -57,17 +58,17 @@ function revalidateResource(request)
 
 async function fetchStaleWhileRevalidate(request)
 {
-	let cache_response = caches.match(request);
+	let cache_response = await caches.match(request);
 
-	// let response_clone = cache_response.clone();
+	let response_clone = cache_response.clone();
 	// console.debug(response_clone.text());
-	// response_clone.text().then(body => console.debug('Cache response body -> ', body));
+	response_clone.text().then(body => console.debug('Cache response body -> ', body));
 
 	let remote_response = revalidateResource(request);
 
 	// console.debug(remote_response);
 
-	return (await cache_response) || (await remote_response);
+	return cache_response || remote_response;
 }
 
 async function fetchCacheFirst(request)
@@ -96,15 +97,33 @@ self.addEventListener('install', function (e)
 });
 
 // Fetching content using Service Worker
+/*
+self.addEventListener('fetch', function (event)
+{
+	if (event.request.method == 'POST') {
+		console.info('[Service Worker] Ignore Post');
+		return;
+	}
+
+	if (event.request.url.match(/^.*\/digapptest\/[\w]*\.(?:js|html)$/)) 
+		event.respondWith(fetchStaleWhileRevalidate(event.request));
+	else event.respondWith(fetchCacheFirst(event.request));
+});*/
+// Fetching content using Service Worker
 self.addEventListener('fetch', function (event)
 {
 	if (event.request.method.toUpperCase() == 'POST') {
 		console.info('[Service Worker] Ignore Post');
 		// return;
-		event.respondWith(fetch(event.request));
+		event.respondWith(fetch(event.request);
 	}
 
 	if (event.request.url.match(/^.*\/dig_app\/[\w]*\.(?:js|html)$/)) 
 		event.respondWith(fetchStaleWhileRevalidate(event.request));
 	else event.respondWith(fetchCacheFirst(event.request));
 });
+
+ // || event.request.clone().method === 'POST'
+        //https://stackoverflow.com/questions/60193297/service-worker-safari-fetch-event-fires-before-the-message-event
+        //search google: safari cannot open the page fetch event cache response clone
+        //safari PWA fetchevent respondwith clone error

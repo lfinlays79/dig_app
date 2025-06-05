@@ -16,6 +16,12 @@
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
 	<link rel="stylesheet" href="js/jquery.mobile-1.4.5/jquery.mobile.structure-1.4.5.css" /> 
+    <script>
+    function gmNoop(){
+        //coz google maps is tedious!
+        console.log('GMap Callback');
+    }    
+    </script>  
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBnFhQbgblVejauHLMXE5HxeHwDAdiCGhU&libraries=drawing,geometry&callback=gmNoop&loading=async"></script>
 	<link rel="manifest" href="digapp.webmanifest">
 
@@ -91,7 +97,7 @@
 
 <div data-role="footer" id="footer">	
 	<a id="back_but" onclick="back_clicked();"></a>
-	<div id="crop_edit_foot"><a class="foot_icon home" onclick="backhome(1);">Home</a><a class="foot_icon inspect" onclick="load_inspect_crop();">Inspect</a><a class="foot_icon testdig"  onclick="load_test_dig();">Test Dig</a><a class="foot_icon boxcount" onclick="load_box_count();">Box Count</a></div>
+	<div id="crop_edit_foot"><a class="foot_icon home" onclick="backhome(1);">Home</a><a class="foot_icon map" onclick="load_crop_map();">Crop Map</a><a class="foot_icon inspect" onclick="load_inspect_crop();">Inspect</a><a class="foot_icon testdig"  onclick="load_test_dig();">Test Dig</a><a class="foot_icon boxcount" onclick="load_box_count();">Box Count</a></div>
 </div>
 	
 <!-- **MAIN** data-tap-toggle="false" <a class="foot_icon dress active" onclick="load_dress();">Dress Report</a>-->
@@ -104,10 +110,10 @@
 				<div class="form_container ac" id="auth_form" style="display: none">
 					<h1 class="page_crop_head_h1">Connect to a Merchant</h1>
 					<div class="mb-3 logdivhide">
-						<input type="text" name="my_dig_url" id="my_dig_url" value="" style="text-transform: uppercase;" placeholder="DIG URL e.g: dig.the-website.com">
+						<input type="url" name="my_dig_url" id="my_dig_url" value="" style="text-transform: uppercase;" placeholder="DIG URL e.g: dig.the-website.com">
 					</div>
 					<div class="mb-3 logdivhide">
-						<input type="text" name="my_email" id="my_email" value="" style="text-transform: uppercase;" placeholder="Your Email Address">
+						<input type="email" name="my_email" id="my_email" value="" style="text-transform: uppercase;" placeholder="Your Email Address">
 					</div>
 					
 					<div class="mb-3 logdivshow" style="display: none">
@@ -176,7 +182,7 @@
 
 			<div id="syncmess" class="white mx-5 mb-2 bold rounded" style="display: none;">
                 <div class="pr-5 nofold" style="display: inline-block; vertical-align: middle"><select name="get_crop_ns" id="get_crop_ns"><option value="0">This Season</option><option value="1">Next Season</option></select></div>
-                <a onClick="get_crop_data();" class="ui-btn ui-icon-refresh ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline">Get Crops</a>                
+                <a onClick="get_all_crop_data();" class="ui-btn ui-icon-refresh ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline">Get Crops</a>                
                 <a onClick="do_the_sync();" class="ui-btn ui-icon-navigation ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red fr">Sync</a>
             </div>
             
@@ -274,11 +280,11 @@
 				
 				<h1 class="pt-2 pb-0 lh14" id="cd_Var" style="font-size: 2em!important;">Variety</h1>
                 <h2 class="p-0 lh14" id="cd_GrowerFarm">Grower</h2>
-                <h4 class="dark pb-2 lh14" id="cd_Frm">Farm</h4>
+                <h2 class="dark pb-2 lh14" id="cd_Frm">Farm</h2>
 				<div class="pb-2 al" id="no_live_data"><strong class="red">Data from App. No connection.</strong></div>
                 
                 <h4 class="white p-0 lh14">Availability</h4>
-                <table id="crop_avail_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1 mb-3" border="2" bordercolor="#AAA199" cellspacing="5" cellpadding="5">	
+                <table id="crop_avail_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1 mb-3" border="2" bordercolor="#b4b5a3" cellspacing="5" cellpadding="5">	
 					<tr>
                         <td class="td_dark ac">Seed</td>
                         <td class="td_dark ac">Ware</td>
@@ -293,8 +299,8 @@
                     </tr>
 				</table>
                 
-				<table id="crop_details_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1" border="2" bordercolor="#AAA199" cellspacing="5" cellpadding="5">	
-                    <tr><td class="td_green">Seed (t)</td><td class="pl-1 bold" id="cd_e3555">-</td><td class="td_red">Boxes</td><td class="pl-1 bold" id="cd_BoxCount">-</td></tr>
+				<table id="crop_details_table" style="width:100%; max-width: 500px; font-size: 1em" class="mt-1" border="2" bordercolor="#b4b5a3" cellspacing="5" cellpadding="5">	
+                    <tr><td class="td_green" style="width: 70px">Seed (t)</td><td class="pl-1 bold" id="cd_e3555">-</td><td class="td_red" style="width: 70px">Boxes</td><td class="pl-1 bold" id="cd_BoxCount">-</td></tr>
 					<tr><td class="td_dark">Field Area</td><td class="pl-1 bold" id="cd_Quantity">-</td><td class="td_dark">All Tonnes</td><td class="pl-1 bold" id="cd_eTotal">-</td></tr>
 					<tr><td class="td_dark">Crop Rate</td><td class="pl-1 bold red" id="cd_crrate">-999</td><td class="td_dark">TD Rate</td><td class="pl-1 bold" id="cd_TestDigRating">-</td></tr>
 					<tr><td class="td_dark">Store Rate</td><td class="pl-1 bold red" id="cd_StoreRating">-999</td><td class="td_dark">Grade (Ent)</td><td class="pl-1 bold" id="cd_EntryUnionGrade">-</td></tr>
@@ -311,7 +317,7 @@
 
                 <h1 class="pt-2 brown mb-1" id="last_td_title">Last Test Dig</h1>
                 <div class="mb-0 pl-1">By: <strong id="ltd_by_name">???</strong> On: <span id="pbtd_date">???</span></div>
-                <table id="ltd_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+                <table id="ltd_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#b4b5a3">	
                     
                 </table>
 
@@ -319,19 +325,19 @@
 
                     <h1 class="pt-2 brown mb-1">Last Inspection</h1>
                     <div class="mb-1 pl-1">By: <strong id="isp_by_name">???</strong></div>
-                    <table id="crop_inspections_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" cellpadding="2" cellspacing="2" border="2" bordercolor="#AAA199">	
+                    <table id="crop_inspections_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" cellpadding="2" cellspacing="2" border="2" bordercolor="#b4b5a3">	
 
                     </table>
            
                 
                 
                 <h1 class="pt-2 brown mb-1">Plan Notes</h1>
-                <table id="crop_inspection_notes_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+                <table id="crop_inspection_notes_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#b4b5a3">	
 
 				</table>
                 
                 <h1 class="pt-2 brown mb-1">Crop Photos</h1>
-				<table id="crop_photos_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#AAA199">	
+				<table id="crop_photos_table" style="width:100%; max-width: 500px; font-size: 1em; overflow-x: hidden;" border="2" bordercolor="#b4b5a3">	
 					
 				</table>
 				
@@ -426,7 +432,44 @@
 	
 	
 	
+
+    
+    
+    
+  
+    
+    
+    
+    
+    
+ 	
+<div data-role="page" id="page_cmap">
+		<div data-role="header" class="top_nav" data-position="fixed">
+		<a data-role="none" onClick="back_home();"><img class="logo" src="img/logo_digdata_nav.png" alt="logo"></a><h1>Crop Map</h1>
+		</div>
+		
+		<div data-role="content">	
+
+			<div class="p-6">
+
+
+				<h1 style="font-size: 2em;" class="mb-2">Crop Map</h1>
+                dasdasdsa
+
+			</div>
+			
+			
+			
+		</div>
+
+</div>	
 	
+	
+	
+	   
+    
+    
+    
 	
 	
 	
@@ -516,7 +559,7 @@
                     
 <div id="inspect_form">   
                     
-   <div class="mb-3 mt-2 ac" id="load_prev_insp_vals_div"><a id="load_prev_insp_vals" class="ui-btn ui-icon-eye ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Load Previous Inspection Values</a></div> 
+   <div class="mb-3 mt-2 ac" id="load_prev_insp_vals_div">Previous Inspection Values - <a id="load_prev_insp_vals" role="none" class="ui-btn ui-icon-eye ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_red">Load</a></div> 
     
 
 
@@ -630,7 +673,7 @@
                     <a id="growstage_field_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>    
 					</div>
 					
-            <div id="growstage_field_div">                    
+            <div id="growstage_field_div" style="display: none;">                    
                     <div class="form-group col-md-3 col-lg-3 pt-2"><label for="GrowStage1">Growth Stage 1</label>
                         <select name="GrowStage1" id="GrowStage1" class="form-control">
                             <option value="0">N/A</option>
@@ -684,7 +727,7 @@
 					<h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Instances</h1>
                     <a id="ins_field_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>  
 					</div>
-            <div id="ins_field_div">                    
+            <div id="ins_field_div" style="display: none;">                    
                     <div class="form-group col-md-3 col-lg-3 pt-2"><label for="isp_passes">Commercial Passes [Crop Walk Drill Passes]</label>
 					<input type="number" min="0" step="1" max="20" name="isp_passes" id="isp_passes" value="1" required class="form-control" autocomplete="dasdz423423" />
 					</div>
@@ -735,7 +778,7 @@
                     <h1 class="mb-0 white" style="display: inline-block; font-size: 1.8em!important;">Sample Defects</h1>
                     <a id="samp_def_tog" class="fr icobig ui-btn ui-icon-eye ui-btn-icon-notext" style="background: transparent; border: 0px;">Toggle</a>  
 					</div>
-                    <div id="samp_def_div">     
+                    <div id="samp_def_div" style="display: none;">     
                     <div id="live_inspect_html">
                     
                     </div>
@@ -780,7 +823,29 @@
 					<label for="isp_comments">Comments or other conditions</label>	
 					<textarea class="form-control" name="isp_comments" style="height: 120px !important;" rows="16" placeholder="Inspection Comments" id="isp_comments" data-autogrow="false"></textarea>
 					</div>
-					
+                    
+                    
+                    
+                    <div class="form-group col-md-12 col-lg-12 pt-2" id="div_ins_notes_selector">
+                        <div>
+                            <h3>Common Inspection Notes</h3>
+                            <p>Select item, update and click GO to apply.</p>
+                            <div id="div_ins_notes_items" class="mt-2">    
+                               
+                            </div>
+                        </div>
+                        
+                        
+					</div>
+					<!--
+                     <div class="ins_notes_item rounded" id="cdiv_1" data-innrow="1"><span class="inote_span_cls">Emergence:</span><input data-role="none" id="cnx_1" data-innrow="1" data-p1="Emergence:" data-p2="%" type="number" min="0" max="100" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 ac redbg50 white" style="width:100px" autocomplete="dlaksrge">% <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_2" data-innrow="2"><span class="inote_span_cls">Ground Cover:</span><input data-role="none" id="cnx_2" data-innrow="2" data-p1="Ground Cover:" data-p2="%" type="number" min="0" max="100" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 ac redbg50 white" style="width:100px" autocomplete="dlaksrge">% <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_3" data-innrow="3"><span class="inote_span_cls">SMD:</span><input data-role="none" id="cnx_3" data-innrow="3" data-p1="SMD:" data-p2="mm+" type="number" min="0" max="25" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 ac redbg50 white" style="width:100px" autocomplete="dlaksrge">mm+ <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_4" data-innrow="4"><span class="inote_span_cls">Stolons:</span><select data-role="none" id="cnx_4" data-innrow="4" data-p1="Stolons:" data-p2="" name="vcl1" class="inote_input_cls form-control d-inline-block mx-2 redbg50 white" style="width:160px"><option value="">Select...</option><option value="Developing">Developing</option><option value=" Early Hooking"> Early Hooking</option><option value=" Hooking"> Hooking</option><option value=" Tuber Initiation"> Tuber Initiation</option><option value=" Bulking"> Bulking</option></select> <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_5" data-innrow="5"><span class="inote_span_cls">Treatments:</span><select data-role="none" id="cnx_5" data-innrow="5" data-p1="Treatments:" data-p2="" name="vcl1" class="inote_input_cls form-control d-inline-block mx-2 redbg50 white" style="width:160px"><option value="">Select...</option><option value="See Plan Notes">See Plan Notes</option><option value="N/A">N/A</option></select> <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_6" data-innrow="6"><span class="inote_span_cls">Tuber size:</span><input data-role="none" id="cnx_6" data-innrow="6" data-p1="Tuber size:" data-p2="" type="number" min="0" max="85" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 ac redbg50 white" style="width:100px" autocomplete="dlaksrge"> =&gt; <input data-role="none" id="cnx_6b" type="number" min="0" max="90" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 ac redbg50 white" style="width:100px" autocomplete="dlaksrge"> <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    <div class="ins_notes_item rounded" id="cdiv_7" data-innrow="7"><span class="inote_span_cls">Weed Control:</span><input data-role="none" id="cnx_7" data-innrow="7" data-p1="Weed Control:" data-p2="" type="text" name="vcl1" value="" class="inote_input_cls form-control d-inline-block mx-2 redbg50 white" style="width:300px" autocomplete="dlaksrge"> <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>
+                    -->
 					
 
 					<div class="form-group col-md-12 col-lg-12 text-center" style="margin-top: 40px;">
@@ -844,10 +909,10 @@
 		
 <div class="p-6">		
 <div id="pre_burn_dig_form" class="mt-1">
-<h1>Pre Burn - Dig Inspection</h1>	
+	
 
 	<div class="orngebg p-box rounded">
-		
+		<h1 style="margin: 5px 0px;">Pre Burn - Dig Inspection</h1>
 		
 		<div class="peagreen pb-2" id="preburn_warn"><strong>Pre Burn Complete</strong><br>You can still make updates just now, but this will be synced later.</div>
 		
@@ -915,7 +980,7 @@
 		
 		
 <div id="test_dig_form" class="mt-3">	
-<h1>Full Test Dig</h1>	
+
 	
 	
 	
@@ -923,8 +988,9 @@
 	
 	
 			
-<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
-<table class="BALTable" style="width:96%;">
+<div class="form-row mb-3 pb-1 pl-3 pr-3 pt-2 rounded overlaybg">
+<h1 style="margin: 5px 0px 10px 15px;">Full Test Dig</h1>	
+<table class="BALTable" style="width:96%; margin-bottom: 15px;">
   <tbody>
     <tr>
       <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 1 (required)</h1></td>
@@ -992,7 +1058,7 @@
 </div>
 
 <div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
-<table class="BALTable" style="width:96%;">
+<table class="BALTable" style="width:96%; margin-bottom: 15px;">
   <tbody>
 	<tr>
     <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 2</h1></td>
@@ -1060,7 +1126,7 @@
 </div>
 			
 <div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
-<table class="BALTable" style="width:96%;">
+<table class="BALTable" style="width:96%; margin-bottom: 15px;">
   <tbody>
 	<tr>
     <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 3</h1></td>
@@ -1128,7 +1194,7 @@
 			
 			
 <div class="form-row mb-3 pb-1 pl-3 pr-3 pt-3 rounded overlaybg">
-<table class="BALTable" style="width:96%;">
+<table class="BALTable" style="width:96%; margin-bottom: 15px;">
   <tbody>
 	<tr>
     <td colspan="3" align="left"><h1 class="nomp pb-1 white pl-10">Dig 4</h1></td>
@@ -1269,11 +1335,6 @@
 
 				<div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
 
-					<div class="form-group col-md-12 col-lg-2" style="margin-top: 60px;">
-						<label for="confirm_crop">Confirm Crop #</label>
-						<input type="text" class="form-control" name="confirm_crop" id="confirm_crop" placeholder="Confirm Crop #" required value="" />
-					</div>
-
 
 					<div class="form-group col-md-12 col-lg-12 text-center">		
 						
@@ -1323,47 +1384,47 @@
 		
 		<div data-role="content">
 			<div class="p-6 mt-2 mb-3" id="Harvest_Box_Count">
-            <div class="mb-3 p-box2 rounded orngebg">
-				
-				<div class="form-row" id="box_count_form">	
-                    
-					<div class="warnbox" id="boxcount_warn"><strong>Box Count is Complete</strong><br>This will auto sync with DIG once you have a connection. You can still make updates just now.</div>
-                    <h1 class="mb-0 pt-2">Harvest Box Count</h1>
-					<h2 class="mb-2 pt-1">Current Boxes: <strong id="current_bc" class="peagreen">50</strong></h2>
-					
-					
-					<div class="form-group col-md-3 col-lg-2"><label for="bc_date">Count Date</label>
-						<input type="date" class="form-control" name="bc_date" id="bc_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" />
-					</div>
-					
-					<div class="form-group col-md-3 col-lg-2"><label for="bc_new">New Box Count</label>
-						<input type="number" name="bc_new" id="bc_new" value="" required class="form-control" autocomplete="dasdz423423" />
-					</div>
-					
-					<div class="form-group col-md-3 col-lg-2 pb-2"><label for="bc_wastage_ratio">Waste %</label>
-						<input type="number" min="0" max="99" step="1" name="bc_wastage_ratio" id="bc_wastage_ratio" value="5" required class="form-control" autocomplete="dasdz423423" />
-					</div>
-					
-					<h3 class="peagreen pb-2"><strong>Remember the Harvest Date. Currently: <span class="white" id="harv_date_now"></span></strong></h3>
-					
-				</div>
-                
-                
-                
-				<div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
-					<div class="form-group col-md-12 col-lg-12 text-center">							
-						<input type="hidden" value="" name="box_myuid" id="box_myuid">
-						<input type="hidden" value="0" name="box_allowflysave" id="box_allowflysave">	
-						<button id="submit_boxcount" class="but_red" onClick="save_and_complete_boxcount();" name="submit_boxcount">Complete &amp Submit Box Count</button>
-					</div>
-				</div>
-				
-			</div>
+                <div class="mb-3 p-box2 rounded orngebg">
+
+                    <div class="form-row" id="box_count_form">	
+
+                        <div class="warnbox" id="boxcount_warn"><strong>Box Count is Complete</strong><br>This will auto sync with DIG once you have a connection. You can still make updates just now.</div>
+                        <h1 class="mb-0 pt-2">Harvest Box Count</h1>
+                        <h2 class="mb-2 pt-1">Current Boxes: <strong id="current_bc" class="peagreen">50</strong></h2>
+
+
+                        <div class="form-group col-md-3 col-lg-2"><label for="bc_date">Count Date</label>
+                            <input type="date" class="form-control" name="bc_date" id="bc_date" placeholder="dd/mm/yyyy" required value="" data-rule="date" data-msg="Please enter a valid date" />
+                        </div>
+
+                        <div class="form-group col-md-3 col-lg-2"><label for="bc_new">New Box Count</label>
+                            <input type="number" name="bc_new" id="bc_new" value="" required class="form-control" autocomplete="dasdz423423" />
+                        </div>
+
+                        <div class="form-group col-md-3 col-lg-2 pb-2"><label for="bc_wastage_ratio">Waste %</label>
+                            <input type="number" min="0" max="99" step="1" name="bc_wastage_ratio" id="bc_wastage_ratio" value="5" required class="form-control" autocomplete="dasdz423423" />
+                        </div>
+
+                        <h3 class="peagreen pb-2"><strong>Remember the Harvest Date. Currently: <span class="white" id="harv_date_now"></span></strong></h3>
+
+                    </div>
+
+
+
+                    <div class="form-row mb-0 pb-3 pl-3 pr-3 pt-3 my-3 rounded">	
+                        <div class="form-group col-md-12 col-lg-12 text-center">							
+                            <input type="hidden" value="" name="box_myuid" id="box_myuid">
+                            <input type="hidden" value="0" name="box_allowflysave" id="box_allowflysave">	
+                            <button id="submit_boxcount" class="but_red" onClick="save_and_complete_boxcount();" name="submit_boxcount">Complete &amp Submit Box Count</button>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 			
 			
 			
-			<div class="p-6 mt-2 mb-1 gradeinventbits">
+        <div class="p-6 mt-2 mb-1 gradeinventbits">
 			<div class="mb-1 p-box2 rounded overlaybg" id="box_splits_changer">
                 
 					<div class="form-row">	
@@ -1398,7 +1459,7 @@
                         
                         
                         
-                        <h2>New Split #1</h2>
+                        <h2 style="margin-top: 25px;">New Split #1</h2>
 						<table style="width: 100%">
 							<tbody>
                                 
@@ -1439,16 +1500,30 @@
                                         <option value="90">90</option>
 									</select>	
 								</td>
-								<td class="p-2"><input type="number" min="-200" max="900.00" step="0.005" name="bx_size_new" id="bx_size_new" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
+								<td class="p-2"><input type="number" min="0" max="900.00" step="0.005" name="bx_size_new" id="bx_size_new" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
                                 <td class="p-2"><input type="number" min="0" max="5000" step="1" name="bx_tubs_new" id="bx_tubs_new" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Tubs/50kg" style="width: 100px;"></td>
 								</tr>
+                                
+                                
+                                <tr>
+                                    <td>Add as:</td>
+                                    <td colspan="3">
+                                    <select name="bx_type_new" id="bx_type_new">
+										<option value="0">Split</option>			
+                                        <option value="1">P/back</option>
+                                        <option value="2">S/Feed</option>
+                                        <option value="3">Dump</option>
+									</select>
+                                    </td>
+                                </tr>
+                                
                                 <tr><td colspan="4">Comments/Notes:<br><input type="text" name="bx_note_new" id="bx_note_new" value="" placeholder="Split note?" autocomplete="dasdz423423" style="width: 100%; background:#7f7e6b; color:#c5c4a6;"></td></tr>
 
 							</tbody>
 						</table>
                         
                         
-                        <h2>New Split #2</h2>
+                        <h2 style="margin-top: 25px;">New Split #2</h2>
                         <table style="width: 100%">
 							<tbody>
 								<tr>
@@ -1486,16 +1561,30 @@
                                         <option value="90">90</option>
 									</select>	
 								</td>
-								<td class="p-2"><input type="number" min="-200" max="900.00" step="0.005" name="bx_size_newb" id="bx_size_newb" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
+								<td class="p-2"><input type="number" min="0" max="900.00" step="0.005" name="bx_size_newb" id="bx_size_newb" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Boxes?" style="width: 100px;"></td>
 								 <td class="p-2"><input type="number" min="0" max="5000" step="1" name="bx_tubs_newb" id="bx_tubs_newb" value="0" class="form-control" autocomplete="dasdz423423" placeholder="Tubs/50kg" style="width: 100px;"></td>
                                 </tr>
+                                
+                                
+                                <tr>
+                                    <td>Add as:</td>
+                                    <td colspan="3">
+                                    <select name="bx_type_newb" id="bx_type_newb">
+										<option value="0">Split</option>			
+                                        <option value="1">P/back</option>
+                                        <option value="2">S/Feed</option>
+                                        <option value="3">Dump</option>
+									</select>
+                                    </td>
+                                </tr>
+                                
                                 <tr><td colspan="4">Comments/Notes:<br><input type="text" name="bx_note_newb" id="bx_note_newb" value="" placeholder="Split note?" autocomplete="dasdz423423" style="width: 100%; background:#7f7e6b; color:#c5c4a6;"></td></tr>
 
 							</tbody>
 						</table>
                         
                         <h4 class="peagreen pb-2"><strong>If you need to submit more than 2 new splits, add these first, then SYNC, reload the crop and repeat.</strong></h4>
-                        <h3 class="bggreen mb-1 ac">Want to add Plant-back? Make the tonnes NEGATIVE</h3>
+          
                         
                         
 					</div>
@@ -1753,76 +1842,76 @@
 <form id="passform" style="padding: 0px; background: transparent;">
 <div class="form px-0 pb-2">
     <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important;">
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_harvest_date">Harvest Date</label>
             <input type="date" name="gcn_harvest_date" id="gcn_harvest_date" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_collection_date">Collection/Dispatch Date</label>
             <input type="datetime-local" name="gcn_collection_date" id="gcn_collection_date" class="form-control" value="" placeholder="dd/mm/yyyy" data-rule="datetime" data-msg="Please enter a valid date time" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0 pt-2">
             <label for="gcn_delivery_date">Delivery Date/Time</label>
             <input type="datetime-local" name="gcn_delivery_date" id="gcn_delivery_date"  class="form-control" value="" placeholder="dd/mm/yyyy" data-rule="datetime" data-msg="Please enter a valid date time">
         </div>
 
-        <div class="form-group col-lg-3 col-md-6 col-sm-12">
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 pt-2">
             <label for="gcn_customer_site">Customer/Site</label>
             <input type="text" name="gcn_customer_site" id="gcn_customer_site" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_customer_ref">Customer Ref</label>
             <input type="text" name="gcn_customer_ref" id="gcn_customer_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_0">
             <label for="gcn_load_number">Merchant Load #</label>
             <input type="text" name="gcn_load_number" id="gcn_load_number" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_1">
             <label for="gcn_merc_prod_number">Merchant Produce #</label>
             <input type="text" name="gcn_merc_prod_number" id="gcn_merc_prod_number" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
     </div>
     <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important;">
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_grower_name">Grower/Farm Name</label>
             <input type="text" name="gcn_grower_name" id="gcn_grower_name" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_0">
             <label for="gcn_grower_name_real">Full Persons Name</label>
             <input type="text" name="gcn_grower_name_real" id="gcn_grower_name_real" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_1">
             <label for="gcn_grower_address">Grower Address</label>
             <textarea name="gcn_grower_address" id="gcn_grower_address" class="form-control tuc" autocomplete="dasdz423423" ></textarea>
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_crop_grown">Crop Grown - County</label>
             <input type="text" name="gcn_crop_grown" id="gcn_crop_grown" value="" class="form-control tuc" placeholder="e.g. Angus or Suffolk" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_crop_origin">Crop Origin</label>
             <input type="text" name="gcn_crop_origin" id="gcn_crop_origin" value="" class="form-control tuc" placeholder="e.g. UK or SCO" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_0">
             <label for="gcn_field_ref">Field Ref</label>
             <input type="text" name="gcn_field_ref" id="gcn_field_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
         
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_0">
             <label for="gcn_store_ref">Store Ref/Type</label>
             <input type="text" name="gcn_store_ref" id="gcn_store_ref" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
         
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_0">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_0">
             <label for="gcn_soil_type">Soil Type</label>
             <select name="gcn_soil_type" id="gcn_soil_type" class="form-control">
                 <option value="SAND">Sand</option>
@@ -1835,24 +1924,24 @@
             </select>
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12 gcn_type_1">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2 gcn_type_1">
             <label for="gcn_loaded_by">Loaded By</label>
             <input type="text" name="gcn_loaded_by" id="gcn_loaded_by" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_haulier">Haulier</label>
             <input type="text" name="gcn_haulier" id="gcn_haulier" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_haul_contact">Haulier Contact</label>
             <input type="text" name="gcn_haul_contact" id="gcn_haul_contact" value="" class="form-control tuc" placeholder="Mobile Number" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_haul_reg">Vehicle Reg/Trailer No</label>
             <input type="text" name="gcn_haul_reg" id="gcn_haul_reg" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_driver_name">Driver Name</label>
             <input type="text" name="gcn_driver_name" id="gcn_driver_name" style="text-transform: uppercase" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
@@ -1869,7 +1958,7 @@
             <input type="text" name="gcn_container_no" id="gcn_container_no" value="" placeholder="(If Applicable)" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
         
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_bags_boxes_bulk">Bags/Boxes/Bulk</label>
             <select name="gcn_bags_boxes_bulk" id="gcn_bags_boxes_bulk" class="form-control d-inline-block">
                 <option value="BAGS">BAGS</option>
@@ -1877,15 +1966,15 @@
                 <option value="BULK">BULK</option>
             </select>
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_bags_boxes_bulk_num"># Bags/Boxes/Bulk</label>
             <input type="number" name="gcn_bags_boxes_bulk_num" id="gcn_bags_boxes_bulk_num" min="0" value="" class="form-control" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_box_weight">Box/Bag Weight (Est)</label>
             <input type="text" name="gcn_box_weight" id="gcn_box_weight" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_weighbridge_weight">Weighbridge Weight</label>
             <input type="text" name="gcn_weighbridge_weight" id="gcn_weighbridge_weight" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
@@ -1895,28 +1984,28 @@
         <h1 class="white mt-25">Box Marks [OUT]</h1>   
         <h3 class="white">Please ensure your entries are accurate.</h3> 
         
-        <div class="form-group col-lg-3 col-md-6 col-sm-12 mt-1">
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 mt-1 pt-2">
             <label for="gcn_marks_out">Box Marks <strong>OUTGOING</strong> e.g: 12 GVAP, 5 MP, 8 JWS</label>
             <input type="text" name="gcn_marks_out" id="gcn_marks_out" value="" class="form-control tuc" placeholder="e.g. Plain, Supplier, Other" autocomplete="dasdz423423" />
             <div class="my-2" id="grower_box_marks_div"></div>
             <!--<input type="text" name="grower_box_avail_marks" id="grower_box_avail_marks" value="" autocomplete="dasdz423423" />-->
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_box_out">Box # <strong>OUT</strong> Total</label>
             <input type="number" min="0" max="26" name="gcn_box_out" id="gcn_box_out" value="" style="font-size: 15px!important;" class="form-control tuc" placeholder="[Number Only]" autocomplete="dasdz423423" />
         </div>
         
         <h1 class="white mt-25">Box Marks [IN]</h1> 
-        <div class="form-group col-lg-3 col-md-6 col-sm-12">
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 pt-2">
             <label for="gcn_marks_in">Box Marks <strong>INCOMING</strong></label>
             <input type="text" name="gcn_marks_in" id="gcn_marks_in" value="" class="form-control tuc" placeholder="e.g. Plain, Supplier, Other" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_box_in">Box # <strong>IN</strong> Total</label>
             <input type="number" min="0" max="60" name="gcn_box_in" id="gcn_box_in" value="" style="font-size: 15px!important;" class="form-control tuc" placeholder="[Number Only]" autocomplete="dasdz423423" />
         </div>
       
-        <div class="form-group col-lg-1 col-md-6 col-sm-12">
+        <div class="form-group col-lg-1 col-md-6 col-sm-12 pt-2">
             <label for="gcn_return_customer">Customer <strong>IN Boxes</strong> from</label>
             <input type="text" name="gcn_return_customer" id="gcn_return_customer" value="" class="form-control tuc" placeholder="[if different from Boxes OUT customer]" autocomplete="dasdz423423" />
         </div>
@@ -1926,7 +2015,7 @@
         
         
 
-        <div class="form-group col-lg-3 col-md-6 col-sm-12 gcn_type_1 mt-25">
+        <div class="form-group col-lg-3 col-md-6 col-sm-12 gcn_type_1 mt-25 pt-2">
             <label for="gcn_cust_site_deliver_to">Customer Site - to be delivered to?</label>
             <input type="text" name="gcn_cust_site_deliver_to" id="gcn_cust_site_deliver_to" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
@@ -1935,16 +2024,16 @@
         
     </div>
     <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important;">
-        <div class="form-group col-12">
-            <h4 class="white mb-0">We, The Above, Guarantee the Variety to be:</h4>
+        <div class="form-group col-12 pt-2">
+            <h2 class="white mb-0">We, The Above, Guarantee the Variety to be:</h2>
         </div>
-        <div class="form-group col-lg-2">
+        <div class="form-group col-lg-2 pt-2">
             <label for="gcn_variety">Variety</label>
             <input type="text" name="gcn_variety" id="gcn_variety" value="" class="form-control tuc" autocomplete="dasdz423423" />
         </div>
        
 
-        <div class="form-group col-lg-2 col-md-6 col-sm-12">
+        <div class="form-group col-lg-2 col-md-6 col-sm-12 pt-2">
             <label for="gcn_trailer_type">Trailer Type</label>
             <select name="gcn_trailer_type" id="gcn_trailer_type" class="form-control">
                 <option value="0">Box</option>
@@ -1953,7 +2042,7 @@
         </div>
 
        
-        <div class="form-group d-inline-block">
+        <div class="form-group d-inline-block pt-2">
             <label for="">Size #1 <span style="color: #b9c0d3">Size Range &amp; # of Boxes</span></label>
             <table style="width: 100%"><tr><td>
                 <select name="size1_1" id="size1_1" class="form-control d-inline-block size0_1">
@@ -1996,7 +2085,7 @@
                 <input type="number" min="0" step="1" name="size1_bx" id="size1_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
             </td></tr></table>
         </div>
-        <div class="form-group d-inline-block">
+        <div class="form-group d-inline-block pt-2">
             <label for="">Size #2 (If Applicable)</label>
             <table style="width: 100%"><tr><td>
                 <select name="size2_1" id="size2_1" class="form-control d-inline-block size0_1">
@@ -2038,7 +2127,7 @@
                 <input type="number" min="0" step="1" name="size2_bx" id="size2_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
             </td></tr></table>
         </div>
-        <div class="form-group d-inline-block">
+        <div class="form-group d-inline-block pt-2">
             <label for="">Size #3 (If Applicable)</label>
             <table style="width: 100%"><tr><td>
                 <select name="size3_1" id="size3_1" class="form-control d-inline-block size0_1">
@@ -2080,7 +2169,7 @@
                 <input type="number" min="0" step="1" name="size3_bx" id="size3_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
             </td></tr></table>
         </div>
-        <div class="form-group d-inline-bloc">
+        <div class="form-group d-inline-block pt-2">
             <label for="">Size #4 (If Applicable)</label>
             <table style="width: 100%"><tr><td>
                 <select name="size4_1" id="size4_1" class="form-control d-inline-block size0_1">
@@ -2122,14 +2211,14 @@
                 <input type="number" min="0" name="size4_bx" id="size4_bx" value="" class="form-control d-inline-block size0_bx" placeholder="Boxes" autocomplete="dasdz423423" />
             </td></tr></table>
         </div>
-        <div class="form-group d-inline-block">
+        <div class="form-group d-inline-block pt-2">
             <label for="gcn_graded">Grading Type?</label>
             <select name="gcn_graded" id="gcn_graded" class="form-control">
                 <option value="1">Graded</option>
                 <option value="0">Ungraded</option>
             </select>
         </div>
-        <div class="form-group d-inline-block">
+        <div class="form-group d-inline-block pt-2">
             <label for="gcn_is_org">Organic Load? * </label>
             <select name="gcn_is_org" id="gcn_is_org" class="form-control">
                 <option value="0">No</option>
@@ -2137,8 +2226,8 @@
             </select>
         </div>
 
-        <div class="form-group col-12 mt-3 gcn_type_1">
-            <h3>Loading Layout</h3>
+        <div class="form-group col-12 mt-3 gcn_type_1 pt-2">
+            <h2>Loading Layout</h2>
             <p style="font-weight:200; color: #ccc" class="mb-0">Choose the Size Split # from the loaded splits above. <span class="peagreen">Hint:</span> You can select the position and type number 1,2,3 or 4</p>
             <div class="mt-3">
                 
@@ -2220,7 +2309,7 @@
 
         
         <div class="form-group col-12 mt-3 gcn_type_1">
-            <h3>Seed Split Information</h3>
+            <h2>Seed Split Information</h2>
             <div class="mt-3">
                 <table class="BALTable align-top" style="width: 100%">
                     <tr>
@@ -2456,28 +2545,28 @@
     <div class="form-row mb-3 p-0 gcn_type_0">
         <div class="form-group col-lg-3 col-md-12">
             <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important; height: 100%">
-                <div class="form-group col-12">
-                    <h3 class="white mb-2">Accreditations</h3>
+                <div class="form-group col-12 pt-2">
+                    <h2 class="white mb-2">Accreditations</h2>
                     <label for="gcn_org_code">Certification Body Code</label>
                     <input type="text" name="gcn_org_code" id="gcn_org_code" value="" placeholder="Soil Association  / SOPA" class="form-control tuc" autocomplete="dasdz423423" />
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 pt-2">
                     <label for="gcn_accred_1">Assured Produce No.</label>
                     <input type="text" name="gcn_accred_1" id="gcn_accred_1" value="" class="form-control tuc" autocomplete="dasdz423423" />
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 pt-2">
                     <label for="gcn_accred_2">..or.. GlobalGap No.</label>
                     <input type="text" name="gcn_accred_2" id="gcn_accred_2" value="" class="form-control tuc" autocomplete="dasdz423423" />
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 pt-2">
                     <label for="gcn_accred_3">LEAF 'Marque' No.</label>
                     <input type="text" name="gcn_accred_3" id="gcn_accred_3" value="" class="form-control tuc" autocomplete="dasdz423423" />
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 pt-2">
                     <label for="gcn_assessment_version">Waitrose Farm Assessment (version)</label>
                     <input type="text" name="gcn_assessment_version" id="gcn_assessment_version" value="" class="form-control tuc" autocomplete="dasdz423423" />
                 </div>
-                <div class="form-group col-12">
+                <div class="form-group col-12 pt-2">
                     <label for="gcn_safe_haven">Seed 'Safe Haven'</label>
                     <select name="gcn_safe_haven" id="gcn_safe_haven" class="form-control">
                         <option value="0">No</option>
@@ -2490,8 +2579,8 @@
         <div class="form-group col-lg-6 col-md-12">
             <div class="form-row mb-3 p-10 darkbg rounded" style="background: #70737b!important; height: 100%">
                 <div class="form-group col-12 align-top">
-                    <h3 class="white mb-1">Pre/Post Harvest Chemical Applications</h3>
-                    <p class="white mb-3">We confirm that legal Harvest Intervals (HI) have been adhered to for all pesticide products applied to this crop, in addition to the specific products that we request information for below. <span style="color: #edbb6e">Complete all appropriate entries.</span></p>
+                    <h2 class="white mb-1 pt-2">Pre/Post Harvest Chemical Applications</h2>
+                    <p class="white mb-3 pt-2">We confirm that legal Harvest Intervals (HI) have been adhered to for all pesticide products applied to this crop, in addition to the specific products that we request information for below. <span style="color: #edbb6e">Complete all appropriate entries.</span></p>
                     <table class="BALTable mx-auto align-top" id="chem_used_table">                        
                         <tr class="rem_chem_used_table">
                             <td title="Last Application Date">Last Apply</td>
@@ -2516,8 +2605,8 @@
         <div class="form-group col-lg-3 col-md-12">
             <div class="form-row mb-3 p-10 darkbg rounded" style="background: #757b8b!important; height: 100%">
                 <div class="form-group col-12 align-top d-inline-block">
-                    <h4 class="white mb-1">Other Chemicals monitored</h4>
-                    <p class="white mb-3">for residue testing reasons: <strong>Please tick if Yes</strong></p>
+                    <h2 class="white mb-1 pt-2">Other Chemicals monitored</h2>
+                    <p class="white mb-3 pt-2">for residue testing reasons: <strong>Please tick if Yes</strong></p>
                     <table class="BALTable align-top" id="chem_test_table">      
                         <tr class="rem_chem_used_table">
                             <td class="pr-1 nofold"></td>
@@ -2542,25 +2631,25 @@
  
 
     <div class="form-row mb-3 p-10 pb-3 darkbg rounded hidepp_fin" style="background: #aaa!important;">
-        <div class="form-group col-12 mb-2">
-            <h3>Declaration/Terms</h3>
+        <div class="form-group col-12 mb-2 pt-2">
+            <h2>Declaration/Terms</h2>
             <div class="gcn_type_0">
-            <p class="mb-1">We also guarantee compliance with all relevant UK &amp; EU legislation relating to Food Safety including, but not limited to, the following:-</p>
-            <p class="mb-1">The Food &amp; Environmental Protection Act 1985, The Pesticides (Maximum Residue Levels) Regulations 2008, The Control of Pesticide Regulations SI No 1997 No. 188</p>
-            <p class="mb-1">EC Regulation 396/2005 and annexes, Regulation (EC) No. 1107/2009 and The Food Safety Act 1990: Sections 7, 8, 14 and amendments</p>
-            <p class="mb-1">Pesticide Residues in Food. Codex Alimentarius Commission Volume 2. Second Edition 1993 (adopted limits only) and amendments</p>
-            <p class="mb-1">Plant Protection Products Regulation 2011 (Great Britain and Northern Ireland)</p>
-            <p class="mb-2">UK Plant Protection Products (Sustainable Use) Regulations 2012 and Directive 2009/128/EC to regulate the sustainable use of pesticide in Europe</p>
-            <p class="mb-1">We confirm the bulker/boxes were sound and fit for the purpose, clean and free from foreign objects prior to loading.</p>
-            <p class="mb-1">The bulker/boxes were loaded in a safe manner without damage. The completed load so far as is reasonably practicable is free from foreign bodies.</p>
+                <p class="mb-1 pt-2">We also guarantee compliance with all relevant UK &amp; EU legislation relating to Food Safety including, but not limited to, the following:-</p>
+                <p class="mb-1 pt-2">The Food &amp; Environmental Protection Act 1985, The Pesticides (Maximum Residue Levels) Regulations 2008, The Control of Pesticide Regulations SI No 1997 No. 188</p>
+                <p class="mb-1 pt-2">EC Regulation 396/2005 and annexes, Regulation (EC) No. 1107/2009 and The Food Safety Act 1990: Sections 7, 8, 14 and amendments</p>
+                <p class="mb-1 pt-2">Pesticide Residues in Food. Codex Alimentarius Commission Volume 2. Second Edition 1993 (adopted limits only) and amendments</p>
+                <p class="mb-1 pt-2">Plant Protection Products Regulation 2011 (Great Britain and Northern Ireland)</p>
+                <p class="mb-2 pt-2">UK Plant Protection Products (Sustainable Use) Regulations 2012 and Directive 2009/128/EC to regulate the sustainable use of pesticide in Europe</p>
+                <p class="mb-1 pt-2">We confirm the bulker/boxes were sound and fit for the purpose, clean and free from foreign objects prior to loading.</p>
+                <p class="mb-1 pt-2">The bulker/boxes were loaded in a safe manner without damage. The completed load so far as is reasonably practicable is free from foreign bodies.</p>
             </div>
             <div class="gcn_type_1">
-            <p class="mb-1">All seed is sold under the current BPTA Terms &amp; Conditions - available from the seller in writing on request or can be viewed at www.bpta.org.uk</p>
+            <p class="mb-1 pt-2">All seed is sold under the current BPTA Terms &amp; Conditions - available from the seller in writing on request or can be viewed at www.bpta.org.uk</p>
 
             <p class="mb-1" id="trade_seed_terms_note"></p>
 
             </div>
-            <p class="mb-3">* Organic crops must be grown in accordance with EC Regulations; (EC) 834/2007, (EC) 889/2008 &amp; (EC) 1235/2008.</p>
+            <p class="mb-3 pt-2">* Organic crops must be grown in accordance with EC Regulations; (EC) 834/2007, (EC) 889/2008 &amp; (EC) 1235/2008.</p>
             
         </div>
         
@@ -2583,35 +2672,35 @@
         <a onClick="capturePhoto(5, 22);" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all ui-btn-inline but_blue">Photo Document</a>
         </div>
         
-        <div class="form-group col-lg-3 col-md-12">
+        <div class="form-group col-lg-3 col-md-12 pt-2">
             <label for="gcn_sign_name" class="black">Your Name</label>
             <input type="text" name="gcn_sign_name" id="gcn_sign_name" style="text-transform: uppercase" required value="" placeholder="Name of Person Completing form" class="form-control tuc is-required" autocomplete="dasdz423423" />
         </div>
-        <div class="form-group col-lg-3 col-md-12">
+        <div class="form-group col-lg-3 col-md-12 pt-2">
             <label for="gcn_comments" class="black">Any additional comments?</label>
             <textarea name="gcn_comments" id="gcn_comments" class="form-control"></textarea>
         </div>
         <div class="form-group col-lg-4 col-md-12 mt-1 pt-2">            
             <label for="gcn_gogo" style="color: #ffffff!important;">I agree to the terms and declarations</label>
-            <div class="black pt-1">
+            <div class="black pt-2">
                 <input type="checkbox" name="gcn_gogo" id="gcn_gogo" value="1" class="form-checkbox big_checkbox" />
                 <strong> I agree and confirm. This application is accurate &amp; complete</strong>.
             </div>
             
             
             <label for="sendtodriv" style="color: #ffffff!important;">Send to 'Haulier Contact' (when complete)</label>
-            <div class="black pt-1">
+            <div class="black pt-2">
                 <input type="checkbox" name="sendtodriv" id="sendtodriv" value="1" class="form-checkbox big_checkbox" />
             </div>
             
             <label for="sendcopy" style="color: #ffffff!important;">Send to 'Myself' (when complete)</label>
-            <div class="black pt-1">
+            <div class="black pt-2">
                 <input type="checkbox" name="sendcopy" id="sendcopy" value="1" class="form-checkbox big_checkbox" />
             </div>
             
             
-            <div class="grey mt-2"><span class="black">Last Update:</span> <span id="gcn_last_update"></span></div>
-            <h3 class="red font-weight-bold">You can save this, and complete later. It will close and submit once you have agreed to the terms.</h3>
+            <div class="grey mt-2 pt-2"><span class="black">Last Update:</span> <span id="gcn_last_update"></span></div>
+            <h3 class="red font-weight-bold pt-2">You can save this, and complete later. It will close and submit once you have agreed to the terms.</h3>
         </div>
         
     </div>
@@ -3054,12 +3143,7 @@
 <script src="js/jquery.mobile-1.4.5/jquery.mobile-1.4.5.js"></script>
 <script src="js/jSignature.min.js"></script>    
 <script src="app.js" defer></script>
-<script>
-function gmNoop(){
-    //coz google maps is tedious!
-    console.log('GMap Callback');
-}    
-</script>    
+
     
     
 </body>

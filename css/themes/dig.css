@@ -249,21 +249,26 @@ html body .ui-group-theme-a .ui-bar-inherit {
 	border-width: 1px;
 	border-style: solid;
 }
-/* Page and overlay 
 
-.ui-page-theme-a, .ui-page-theme-a .ui-panel-wrapper {
-	background-color: #f9f9f9;
-	border-color: #bbbbbb;
-	color: #333333;
-	text-shadow: 0  1px 0 #f3f3f3 ;
-}
-*/
 
 .ui-page-theme-a, .ui-page-theme-a .ui-panel-wrapper  {
-	background-color: #a7a57d /*{a-page-background-color}*/;
-	border-color: #a7a57d /*{a-page-border}*/;
+	background-color: #b4b5a3 /*{a-page-background-color}a7a57d*/;
+	border-color: #b4b5a3 /*{a-page-border}*/;
 	color: #F3F3F3 /*{a-page-color}*/;
 	text-shadow: none;
+    
+    /*
+    text-shadow: none;
+    background: #b4b5a3;
+    background: -webkit-linear-gradient(top, #b4b5a3, #A9ABB8);
+    background: -moz-linear-gradient(top, #b4b5a3, #A9ABB8);
+    background: linear-gradient(to bottom, #b4b5a3 0px, #b4b5a3 70%, #BCBDCD 100%) fixed;
+    font-weight: 400;    
+    background-image: radial-gradient( ellipse at center, #b4b5a3 0%, rgba(228,229,235,0.6) 70%, rgba(228,229,235,0.3) 100% ), url("../../img/whitebg2.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-font-smoothing: antialiased;
+    */
 }
 .ui-overlay-a {
 	background-color: #343738 /*{a-page-background-color}*/;

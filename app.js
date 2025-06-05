@@ -23,13 +23,12 @@ var walkmap_started = 0;
 var sig_default = '';
 var insp_list = '';
 //request for location
-var applive = true;
 var applive = false;
-
 var app_user_type = 0;//0 admin 1 store user
 var sigfile;
 var sigfile_d;
 var inspcommon_list = '';
+var insp_common_html_list = [];
 
 var arr_gro_stages_full = ['N/A','LESS THAN 100% EMERGENCE','100% EMERGENCE','MARKING ROWS','MEETING DOWN ROWS','MEETING ACROSS ROWS','MEETING ACROSS BEDS','BUDS FORMED','IN FLOWER','IN FULL FLOWER','LUSH GREEN','STARTING TO SENESCE','PART SENESCED'];
 var arr_gro_stages = ['N/A','<100%','100% EM','MR','MDR','MAR','MAB','BF','IF','IFF','LGR','STS','PTS'];
@@ -182,7 +181,7 @@ function showPosition(position) {
 		
 		
 		create_db = evt.currentTarget.result.createObjectStore('podat_crops', { keyPath: 'id', autoIncrement: true });
-		colarr = ["merc_id", "gid", "CropNo", "latlng_json", "marker_json", "Grower", "FarmName", "FID", "FieldGeneration", "Variety", "varietyid", "EntryUnionGrade", "AttainedUnionGrade", "BoxCount", "e3555", "eTotal", "eStartTotal", "allocated_quant", "dispatched_quant", "Quantity", "CropRating", "TestDigRating", "StoreRating", "DatePlanted", "BurnDate", "HarvestDate", "DateHerb", "LatLong", "geo_temp", "eWare", "allocated_quant_s", "allocated_quant_w", "dispatched_quant_s", "dispatched_quant_w", "purc_id", "field_name", "ImActive", "syear", "thisornext"];
+		colarr = ["merc_id", "gid", "CropNo", "Grower", "FarmName", "FID", "FieldGeneration", "Variety", "varietyid", "EntryUnionGrade", "AttainedUnionGrade", "BoxCount", "e3555", "eTotal", "eStartTotal", "allocated_quant", "dispatched_quant", "Quantity", "CropRating", "TestDigRating", "StoreRating", "DatePlanted", "BurnDate", "HarvestDate", "DateHerb", "LatLong", "geo_temp", "eWare", "allocated_quant_s", "allocated_quant_w", "dispatched_quant_s", "dispatched_quant_w", "purc_id", "field_name", "ImActive", "syear", "thisornext"];
 		colLn = colarr.length;
 		for (i = 0; i < colLn; i++) {
 			create_db.createIndex(colarr[i], colarr[i], { unique: false });
@@ -701,7 +700,7 @@ function get_index_by_val(s_name, the_obj='', the_val='', dbrow, gotofun=''){
 			var cursor = e.target.result;
 			
 			if(cursor){
-				//get_index_by_ val('podat_crops', 'gid', trow.gid, trow, 'load_dress_ list_add_ row');
+				//get_index_by_ val('podat_ crops', 'gid', trow.gid, trow, 'load_dress_ list_add_ row');
 				if (cursor.value[the_obj]==the_val && cursor.value.merc_id==merch_id) {
 					gotreclen = 1;
 					//aler_t(cursor.value);
@@ -1195,7 +1194,7 @@ function delete_from_store_where(s_name, z_column=0, z_val=0, x_column=0, x_val=
 
 }
 
-//delete_from_store_not_where('podat_inspections', 'myuid', 'NEW');
+//delete_from_store_not_where('podat_ inspections', 'myuid', 'NEW');
 function delete_from_store_not_where(s_name, z_column=0, z_val=0, x_column=0, x_val=0) {
 
 	
@@ -1280,8 +1279,9 @@ function delete_all_from_store_(s_name) {
 
 			cursor.continue();
 		}else{
-			get_crop_data_gogo();
-			
+            if(s_name=='podat_crops'){
+                get_crop_data_gogo();
+            }
 		}
 	};
 	
@@ -1325,7 +1325,7 @@ function go_check_key(){
         
         //if(digurl=='www.tayfusion.com'){dg folder = 'dig-demo';}else{dg folder = 'dig';}
 		//$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/"+dg folder+"/dig_mobxxx/db_auth_usr.php", success: function(data){
-				$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "http://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
+				$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"something":akey, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
 
 					if(data=='404'){
 						alert('Sorry no match found, please try again [1]');
@@ -1370,7 +1370,7 @@ function go_check_key(){
             //consol e.log('digurl',digurl);
 		        //if(digurl=='www.tayfusion.com'){dg folder = 'dig-demo';}else{dg folder = 'dig';} 
                 //$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/"+dg folder+"/dig_mobxxx/db_auth_usr.php", success: function(data){
-				$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "http://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
+				$.ajax({type: "POST", dataType: "html", crossDomain: true, cache: false, data:{"myem":my_email, "x": "dasd%&$dkasgdas"}, url: "https://"+digurl+"/dig_mobxxx/db_auth_usr.php", success: function(data){
 
 					if(data=='404' || data==0){
 						alert('Sorry, no match found, please try again. [2]:'+data);
@@ -1416,7 +1416,7 @@ function load_user(mcid){
 	$('#my_access_key').val('');
 	$('#my_dig_url').val('');
 	////////////////////
-	
+	insp_common_html_list = [];
 	//aler_t('MCID:'+mcid);
 	//"merc_id", "user name", "userkey", "remote_ type", "digurl", "merchname"
 	var store = getObjectStore('podat_user', 'readonly');
@@ -1432,7 +1432,7 @@ function load_user(mcid){
 				merch_id = urow.merc_id;
 				aid = urow.aid;
 				userkey = urow.userkey;
-                mobSysURL = 'http://'+urow.digurl+'/';
+                mobSysURL = 'https://'+urow.digurl+'/';
 				
 				username = urow.username;
 				remote_type = urow.remote_type;
@@ -1452,11 +1452,17 @@ function load_user(mcid){
                 if(urow.insp_common_list !=null){
                 inspcommon_list = JSON.parse(urow.insp_common_list);
 
-                    
+                    //consol e.log(inspcommon_list);
                     //common_notes_div //common_notes_table //common_notes_tog_but
                     if(inspcommon_list.length>=1){
-                        $.each(inspcommon_list, function(idx, itm) {                        
-                            $('#common_notes_table').append('<tr><td class="nofold py-2 bold clickynote" onClick="click_go_note(\''+itm+'\');">'+itm+'</td></tr>').enhanceWithin();                        
+                        $.each(inspcommon_list, function(idx, itm) { 
+                            if(itm.note_is_common==1){
+                                $('#common_notes_table').append('<tr><td class="nofold py-2 bold clickynote" onClick="click_go_note(\''+itm.note_desc+'\');">'+itm.note_desc+'</td></tr>').enhanceWithin();
+                            }else{
+                                insp_common_html_list.push(itm);
+                            }
+                            //
+                            
                         });
                         $('#common_notes_tog_but').show();
                         //$('#common_notes_div').show();
@@ -1468,7 +1474,7 @@ function load_user(mcid){
                 
                 
                 
-                //console.log('urow check',urow);
+                //consol e.log('urow check',urow);
                 if(app_user_type=='0'){
                     //admin
 					$('.foot_icon.testdig').show();
@@ -1546,7 +1552,7 @@ function click_go_note(nte){
 
 
 
-function get_crop_data(){
+function get_all_crop_data(){
 	$delall_ = delete_all_from_store_('podat_crops');
 }
 
@@ -1556,7 +1562,7 @@ function get_crop_data(){
 
 function get_crop_data_gogo(){
 	
-
+    //$delall_ = delete_all_from_ store_('podat_crops');
 	$("#crop_edit_foot").hide();
 	$('#status_bot').html('Getting Live Crops');
 	$('#crop_list_tableg div').remove();
@@ -1617,7 +1623,7 @@ function get_crop_data_gogo(){
                                     if(z==0 && parseInt(rz[z]['syear'])!=syear){
                                         syear = parseInt(rz[z]['syear']);                                                
                                         rebuld_growt_stage_drops();                                        
-                                        console.log('CRPX:',rz[z]);                                        
+                                        //consol e.log('CRPX:',rz[z]);                                        
                                     }
                                     
                                     
@@ -1637,6 +1643,7 @@ function get_crop_data_gogo(){
 									
 											var obj = {merc_id: merch_id, gid: rz[z]['id'], CropNo: CropNo, latlng_json:rz[z]['latlng_json'], marker_json:rz[z]['marker_json'], Grower: Grower, FarmName: FarmName, FID: FID, FieldGeneration: FieldGeneration, Variety: Variety, varietyid: rz[z]['variety_id'], EntryUnionGrade: rz[z]['EntryUnionGrade'], AttainedUnionGrade: rz[z]['AttainedUnionGrade'], BoxCount: rz[z]['BoxCount'], e3555: rz[z]['e3555'], eTotal: rz[z]['eTotal'], eStartTotal: rz[z]['eStartTotal'], allocated_quant: rz[z]['allocated_quant'], dispatched_quant: rz[z]['dispatched_quant'], Quantity: rz[z]['Quantity'], CropRating: rz[z]['CropRating'], TestDigRating: rz[z]['TestDigRating'], StoreRating: rz[z]['StoreRating'], DatePlanted:rz[z]['DatePlanted'], BurnDate:rz[z]['BurnDate'], HarvestDate:rz[z]['HarvestDate'],DateHerb:rz[z]['DateHerb'], LatLong:rz[z]['LatLong'], geo_temp:rz[z]['geo_temp'], eWare:rz[z]['eWare'], allocated_quant_s:rz[z]['allocated_quant_s'], allocated_quant_w:rz[z]['allocated_quant_w'], dispatched_quant_s:rz[z]['dispatched_quant_s'], dispatched_quant_w:rz[z]['dispatched_quant_w'], purc_id:rz[z]['purchase_id'], field_name:rz[z]['field_name'], ImActive:0, syear:rz[z]['syear'], thisornext:$("#get_crop_ns").val() };	
 											//docall=1;
+                                            console.log('insert crp: ', CropNo);
 											docall = go_insert_('podat_crops', obj);
 									
 											if(docall==1){
@@ -1668,6 +1675,9 @@ function get_crop_data_gogo(){
             ajaxerror('Error Getting Crops');
         }
 		});
+        
+        
+        
 	
 	}else{
         $delallu_ = delete_all_from_store_('podat_user');
@@ -1957,14 +1967,14 @@ function clicked_ccon(c_code){
    if(remote_type==0 && username.length<=3 && username.length>1){
        cc_code = c_code; 
 		if(navigator.onLine){
-            console.log(userkey,cc_code);
+            //consol e.log(userkey,cc_code);
 			$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"pod":userkey, "cc":cc_code, "x": "32h1%&1_$*$£6688s"}, url: mobSysURL+"dig_mobxxx/db_get_this_cust.php", success: function(data){
                 
 				if(data=='404'){
 					alert('Sorry, no match found, please try again. [4]');
 				}else{
 					var rz = data.rez;
-                    console.log('clicked_ccon', rz, cc_code);
+                    //consol e.log('clicked_ccon', rz, cc_code);
                     cust = rz['cust'];
                     cons = rz['cons'];
                     ords = rz['ords'];
@@ -2025,7 +2035,7 @@ function clicked_ccon(c_code){
                         alloh = '';//ords
                         
                      
-                        console.log('ords::: ',ords);                        
+                        //consol e.log('ords::: ',ords);                        
                         for(var ox=0; ox<ords.length; ox++){
                             thisoxr = ords[ox];
                             if(thisoxr[0]==thisor['cn_id']){                            
@@ -2447,7 +2457,7 @@ function clicked_pass(p_code){
                     
                     ////set the TRADE status
                     //pp_state_change//pp_state_now//trade_states///////////////////////
-                    console.log('clicked_pass data:',rz);
+                    //consol e.log('clicked_pass data:',rz);
                     current_pp_state = Number(rz.tp_status);
                     next_pp_state = current_pp_state+1;
                     $("#pp_state_change_div").hide();
@@ -2675,7 +2685,7 @@ function clicked_pass(p_code){
                     $('.rem_chem_used_table').remove(); //kill
                     if(rz.chem_array){
                         for(z=0;z<rz.chem_array.length;z++){                        
-                            $('#chem_used_table').append("<tr class='rem_chem_used_table'><td colspan='3'><h3>"+rz.chem_array[z]+"</h3></td></tr>").enhanceWithin();
+                            $('#chem_used_table').append("<tr class='rem_chem_used_table'><td colspan='3' class='pt-2'><h3>"+rz.chem_array[z]+"</h3></td></tr>").enhanceWithin();
                             if(z==0){$('#chem_used_table').append('<tr class="rem_chem_used_table"><td>Last Applied</td><td>Harvest Interval</td><td>Apply Amt</td></tr>').enhanceWithin();}
                             $('#chem_used_table').append('<tr class="rem_chem_used_table"><td width:40%><input type="date" name="cu_appdate_'+z+'" id="cu_appdate_'+z+'" value="" class="form-control" autocomplete="dasdz423423" /></td><td><input type="number" name="cu_harvint_'+z+'" id="cu_harvint_'+z+'" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Hvst Interval" /></td><td><input type="number" name="cu_amt_'+z+'" id="cu_amt_'+z+'" value="" class="form-control ac" autocomplete="dasdz423423" placeholder="Apply Amt" /></td></tr>').enhanceWithin(); 
                         }
@@ -2788,10 +2798,10 @@ function bump_pp_state(){
             $("#bump_pp_state_but").hide();
             if(next_pp_state==(current_pp_state+1) && next_pp_state>0 && next_pp_state<4){
                 
-                console.log('bump_pp_state vv', "cc",pp_code, "view_trade_pid",view_trade_pid, "view_trade_id",view_trade_id, "next_pp_state",next_pp_state, "advancepp",1);
+                //consol e.log('bump_pp_state vv', "cc",pp_code, "view_trade_pid",view_trade_pid, "view_trade_id",view_trade_id, "next_pp_state",next_pp_state, "advancepp",1);
                 //bump_pp_state 3038 3041 0 1
                 $.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"pod":userkey, "cc":pp_code, "view_trade_pid":view_trade_pid, "view_trade_id":view_trade_id, "next_pp_state":next_pp_state, "advancepp":"1", "x": "_1%&6881$*$£632hs"}, url: mobSysURL+"dig_mobxxx/db_get_this_passport.php?rnd="+Math.random(), success: function(data){
-                    console.log('bump_pp_state:',next_pp_state,data);
+                    //consol e.log('bump_pp_state:',next_pp_state,data);
                     
                     if(data=='404'){
                         alert('Sorry, no match found, please try again. [6]');
@@ -3027,7 +3037,9 @@ function load_dress_list(){
 							}
 							cursor.continue();									
 					}else{
-                        BuildDRsView(retdval); 
+                        //dont do this is looking at next years crops!
+                        if($("#get_crop_ns").val()==0){BuildDRsView(retdval);}
+                        
                     }
 
 				};     
@@ -3048,6 +3060,8 @@ function load_dress_list(){
 
 var firsttime = true;
 var cntdrs = 0;
+
+
 function BuildDRsView(retdval){
 
     $('#dress_list_table div').remove(); 
@@ -3070,7 +3084,7 @@ function BuildDRsView(retdval){
         for(i = 0; i < drs_len; i++) {
             trow = retdval[i];
             
-            //consol e.log('dress_list_box',trow); 
+            //consol e.log('dress_list_ box',trow); 
             //is this a trade?
             typ = 0;
             if(trow.extra_rs!=''){
@@ -3094,7 +3108,7 @@ function BuildDRsView(retdval){
             if(t_left==0.5){t_symb = '&half;';}else if(t_left==0.25){t_symb = '&frac14;';}else if(t_left==0.75){t_symb = '&frac34;';}
             ///////////////////////
                
-            //clicked_crop(crop, merch,  drsid)
+            //clicked_ crop(crop, merch,  drsid)
             CROPX = Number(trow.gid);///this needs to be the store index id, not the crop ID
             //<span style='color:#8AC585'>t</span>
             ditype = '[Grading] ';
@@ -3294,19 +3308,19 @@ function buildCropView_build(crp_arr) {
 	curr_g = '';
 	curr_g_num = 100;
 	//aler_t('dsds');
-	//consol e. log('podat_crops GET');
+	//consol e. log('podat_ crops GET');
 	var crps_html = '';
     var vrps_html = '';
 	var crp_len = 0;
 	var crpgotlen = 0;
 	if(crp_arr.length==0){
 		if(navigator.onLine){
-			get_crop_data();	
+			get_all_crop_data();	
 		}else{
 			alert('We cannot get your crops... you seem to be offline. Please refresh when you are online.');
 		}  
 	}else{
-		
+		//consol e.log(crp_arr);
 		for (i = 0; i < crp_arr.length; i++) {
 			trow = crp_arr[i];
 			
@@ -3437,7 +3451,7 @@ function buildCropView_build(crp_arr) {
           return 0;
         });
         
-        //consol e. log(crp_arr);
+        
         curr_g = '';
         curr_v = '';
 
@@ -3448,14 +3462,18 @@ function buildCropView_build(crp_arr) {
 			trow = crp_arr[i];
 			if(trow.merc_id==merch_id && trow.CropNo!=''){
                 
+                    //if(trow.Grower=='Fairfields Farming Co'){consol e.log(trow);}
+                    
                     //eWare, allocated_quant_s, allocated_quant_w
          
 					if(trow.Variety!=curr_v){
 						if(curr_v!=''){
                             stns = stns.toFixed(1);
                             wtns = wtns.toFixed(1);
+                            
                             vrps_html +="<tr class='itm'><td class='pr-5 ar' style='padding: 0.1em 0.2em!important; color:#dbd9ba;'>Seed/Ware Est.</td><td class='ac' style='padding: 0.2em 0em!important;'><div class='rounded white' style='background:#265C16; margin: 0.2em 0.2em!important; padding: 0.1em 0.3em!important;'>"+stns+"t</div></td><td class='ac' style='padding: 0.2em 0em!important;'><div class='rounded white' style='background:#666543; margin: 0.2em 0.2em!important; padding: 0.1em 0.3em!important;'>"+wtns+"t</div></td></tr><tr class='itm'><td class='pr-5 ar' colspan='3' style='padding: 0.3em 0.2em!important;'></td></tr>";
                             vrps_html += '</table></div>';
+                            
                             stns = 0;
                             wtns = 0;
                         }
@@ -3540,7 +3558,11 @@ function buildCropView_build(crp_arr) {
                         ratinx = '<div class="rag_'+ratcls+' ragdiv mx-auto">'+trow.CropRating+'</div>';  
                         farmfield = trow.field_name;
                         if(farmfield==''){farmfield = trow.FarmName;}
-                        vrps_html +="<tr id='vn_"+trow.gid+"' class='itm' onclick='clicked_crop("+crpid+",-"+trow.varietyid+",0)'><td><strong class='green'>"+grde+trow.FieldGeneration+"</strong> <strong class='"+cncls+"'>"+trow.CropNo+"</strong> "+farmfield+"</td><td class='ac'>"+ratinx+"</td><td class='ac'><strong class='green'>"+quantc+"</strong></td><td class='ac'><strong class='brown'>"+avail+"</strong></td></tr>";
+                        vrps_row ="<tr id='vn_"+trow.gid+"' class='itm' onclick='clicked_crop("+crpid+",-"+trow.varietyid+",0)'><td><strong class='green'>"+grde+trow.FieldGeneration+"</strong> <strong class='"+cncls+"'>"+trow.CropNo+"</strong> "+farmfield+"</td><td class='ac'>"+ratinx+"</td><td class='ac'><strong class='green'>"+quantc+"</strong></td><td class='ac'><strong class='brown'>"+avail+"</strong></td></tr>";
+                        //consol e.log('crop_list_tablev', vrps_row);
+                        
+                        
+                        vrps_html +=vrps_row;
    
                     }
                     
@@ -3555,13 +3577,16 @@ function buildCropView_build(crp_arr) {
             stns = stns.toFixed(1);
             wtns = wtns.toFixed(1);
             vrps_html +="<tr class='itm'><td class='pr-5 ar' style='padding: 0.1em 0.2em!important; color:#dbd9ba;'>Seed/Ware Est.</td><td class='ac' style='padding: 0.2em 0em!important;'><div class='rounded white' style='background:#265C16; margin: 0.2em 0.2em!important; padding: 0.1em 0.3em!important;'>"+stns+"t</div></td><td class='ac' style='padding: 0.2em 0em!important;'><div class='rounded white' style='background:#666543; margin: 0.2em 0.2em!important; padding: 0.1em 0.3em!important;'>"+wtns+"t</div></td></tr><tr class='itm'><td class='pr-5 ar' colspan='3' style='padding: 0.3em 0.2em!important;'></td></tr>";
-            //vrps_html += '</table></div>';
+            
             stns = 0;
             wtns = 0;
         }
 
 		
 		vrps_html += '</table></div>';
+        
+        
+        
         
 		$('#crop_list_tablev').append(vrps_html).enhanceWithin();
 
@@ -3663,6 +3688,10 @@ function clicked_crop(cc, merch,  drsid, typ=0){
 	
 	clean_crop_table();
 	getLocation();
+    
+    console.log('clicked_crop', 'cc:', cc, 'mrch:', merch,  'drs:', drsid, 'typ:', typ);
+    
+    
     if(merch>0){
 	   open_merch_id = merch;
     }else if(merch<0){
@@ -3675,10 +3704,9 @@ function clicked_crop(cc, merch,  drsid, typ=0){
 	$("#igid").val(0);//
 	igid = 0;
     
-   //consol e. log('clicked_ crop', cc, merch,  drsid,  typ);
-	//$('#dress_gid').val(cc);//!!!!!!! need this!	 
+
     
-	
+	//cc: 999 mrch: 0 drs: 293 typ: 0
 	if(drsid>0){
 		$('#dress_id').val(drsid);
         $('#dress_id_type').val(typ);
@@ -3745,9 +3773,9 @@ function fill_crop_detail(rz){
 		$("#igid").val(igid);//
     
         if($('#dress_id').val()>0){
-        //ignore
+            //ignore
         }else{
-        get_inspection_notes_from_server(igid);
+            get_inspection_notes_from_server(igid);
         }
     
 		
@@ -3802,8 +3830,8 @@ function fill_crop_detail(rz){
 		$("#the_store_rating").val(rz.StoreRating).change();
 
 		$("#cd_GrowerFarm").html(rz.Grower);//
-		$("#cd_Var").html(ch1+' <span style="color:#915826; float:right">'+rz.CropNo+'</span>');
-        $("#cd_Frm").html(rz.FarmName+' <span style="color:#d3d1b7">'+rz.field_name+'</span>');
+		$("#cd_Var").html(ch1+' <span style="color:#915826;">'+rz.CropNo+'</span>');
+        $("#cd_Frm").html(rz.FarmName+' <span style="color:#7A7756">'+rz.field_name+'</span>');
 	
 		$("#cd_plantd").html('N/A');
 		$("#cd_burnd").html('N/A');	
@@ -3815,7 +3843,23 @@ function fill_crop_detail(rz){
     
         crop_words = rz.CropNo+"^"+rz.Variety+"^"+rz.FarmName+"^"+rz.field_id+"^"+rz.FID+"^"+rz.Quantity;
 
-  
+    
+        /*
+        if(rz.LatLong.length<10 && rz.geo_temp!='' && rz.geo_temp!= undefined && rz.geo_temp.length>10){
+            //use basic chords...
+            
+            rz.geo_temp = rz.geo_temp.replace(/\s/g,'');
+            
+            rz.LatLong = '('+rz.geo_temp+')';
+            
+            geotemp = rz.geo_temp.split(",");
+            //consol e.log('rz.geo_temp', rz.geo_temp, geotemp);
+            p_lat = geotemp[0].trim();
+            p_long = geotemp[1].trim(); 
+        
+        }*/
+    
+    
     
         if(rz.LatLong && rz.LatLong.length>10){
             myll = rz.LatLong;
@@ -3894,20 +3938,20 @@ function fill_crop_detail(rz){
             $("#the_harvest_date").val('');
             //$("#ins_field_div").show();
             //$("#samp_def_div").hide();
-            $("#growstage_field_div").show();
+            //$("#growstage_field_div").show();
         }
 		
 
 	
 
-	
-
-		$.each(rz, function(idx, itm) {
-			if(idx!='DatePlanted' && idx!='BurnDate' && idx!='HarvestDate' && idx!='DateHerb'){
-			$('#cd_'+idx).html(itm);
-			}
-		});
-    
+        console.log('dump crop',rz);
+        if(rz.length){
+            $.each(rz, function(idx, itm) {
+                if(idx!='DatePlanted' && idx!='BurnDate' && idx!='HarvestDate' && idx!='DateHerb'){
+                $('#cd_'+idx).html(itm);
+                }
+            });
+        }
     
         avail = 0;wvail = 0;
         avail = parseFloat(rz.e3555-rz.allocated_quant_s);
@@ -3984,7 +4028,7 @@ function fill_crop_detail(rz){
                                 
                                 for(z=0;z<rz.CropPhotos.length;z++){
                                     crppho = rz.CropPhotos[z];
-                                    cropphoto_html += "<tr class='itm'><td class='p-2 ac'><img style='width:100%' src='"+mobSysURL+"_assets/_user/images/from_dig/"+crppho.photo_file+"' /><br>"+ptypes[crppho.pttype]+": "+crppho.sdate+"</td></tr>";   
+                                    cropphoto_html += "<tr class='itm'><td class='p-2 ac'><img class='rounded2' style='width:100%' src='"+mobSysURL+"_assets/_user/images/from_dig/"+crppho.photo_file+"' /><br>"+ptypes[crppho.pttype]+": "+crppho.sdate+"</td></tr>";   
                                 }
                                 $('#crop_photos_table').append(cropphoto_html).enhanceWithin();
                             }else{
@@ -4322,7 +4366,7 @@ function get_inspection_notes_from_server(xgid){
 	//delcurrddats_ = delete_from_store_where('podat_inspection_ notes', 'myuid', '0');///only kill the ones that have not been added or updated
         $.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"pod":userkey, "cc":xgid, "x": "_1%&$*$£632hs6881", "gn": "getnotes"}, url: mobSysURL+"dig_mobxxx/db_get_last_inspection.php", success: function(data){
 
-			console.log('get_inspection_notes_from_server',data);
+			//consol e.log('get_inspection_notes_from_server',data);
 			if(data=='404'){				
 
 				//aler t('Sorry, no connection to tha t merchant [i]');///this means we connected, but the user is not authenticated any more...I think!!!
@@ -4666,7 +4710,7 @@ function save_the_dates(){
 		delcurrddats_ = delete_from_store_where('podat_misc_saves', 'gid', igid, 'misc_type', 'CDATES');///delete all where the merc_id is the current active merc_id
 		///add record
 		send_var = 'CDATES|'+$("#the_plant_date").val()+'|'+$("#the_burn_date").val()+'|'+$("#the_harvest_date").val()+'|'+$("#the_herb_date").val()+'|'+$("#the_crop_rating").val()+'|'+$("#the_store_rating").val()+'|'+$("#vertices").val();  //include the vertices
-		console.log('save_the_dates: ',send_var);		
+		//consol e.log('save_the_dates: ',send_var);		
 		var obj = {merc_id: merch_id, misc_type: 'CDATES', gid: igid, save_value: send_var, synckey: userkey};	
 		docall = go_insert_('podat_misc_saves', obj);
         
@@ -4737,7 +4781,16 @@ function save_the_dates(){
 
 
 
-
+function load_crop_map(){
+	//db.transaction(function(tx){tx.executeSql("DELETE FROM podat_ inspections WHERE myuid='NEW'",[],successCallBack, errorHandler);},errorHandler,successCallBack);
+	if(!isNaN(igid) && igid>0){
+		$.mobile.changePage( "#page_cmap", { transition: "flip"});
+		gotop('page_cmap');
+	}else{
+		alert('No Crop Selected'); 
+		$.mobile.changePage( "#page_cmap", { transition: "flip"});
+	}
+}
 
 
 
@@ -4761,6 +4814,54 @@ function load_inspect_crop(){
 		alert('No Crop Selected for Inspection'); 
 		$.mobile.changePage( "#page_crops", { transition: "flip"});
 	}
+}
+
+$('#div_ins_notes_selector').hide();
+
+function get_inspect_notes_selector(rz){	
+    
+    insp_common_html_list = [];
+	issqlstr = '';	
+    $('#div_ins_notes_selector').hide();
+    //consol e.log('inspec selector REZ: ', rz);
+	if(rz==-1){
+        
+        
+        $('#common_notes_table').html('');
+        if(rz.insp_common_list !=null){
+            inspcommon_list = JSON.parse(rz.insp_common_list);
+            if(inspcommon_list.length>=1){
+                $.each(inspcommon_list, function(idx, itm) { 
+                    if(itm.note_is_common==1){
+                        
+                    }else{
+                        insp_common_html_list.push(itm);
+                    }
+                });
+            }
+            build_inspect_notes_selector();
+        }    
+  
+	}
+
+}
+
+function build_inspect_notes_selector(){	
+    if(insp_common_html_list.length>1){
+        //$('#div_ins_notes_selector').html('');
+        //consol e.log('build_inspect SEL REZ:', insp_common_html_list);
+        $('#div_ins_notes_items').html();
+        div_ins_notes_items = '';
+        //<div class="ins_notes_item rounded" id="cdiv_1" data-innrow="1">
+        incnt = 1;
+        $.each(insp_common_html_list, function(idx, itm) { 
+            div_ins_notes_items+='<div class="ins_notes_item rounded" id="cdiv_'+incnt+'" data-innrow="'+incnt+'">'+itm.note_desc+' <a class="ins_changeme_go btn btn-danger float-right ml-3 mr-0">GO</a></div>';
+            incnt++;
+        });
+        //consol e.log('div_ins_notes_items HTML:', div_ins_notes_items);
+        $('#div_ins_notes_items').html(div_ins_notes_items);
+        $('#div_ins_notes_selector').show();
+    }
 }
 
 
@@ -4790,7 +4891,13 @@ function clear_inspect_form(){
     $('#notexdate').val(todayDate).change();
 	set_button_high();
 	
-	
+	//build the listy thing insp_ common_ html _list
+    if(insp_common_html_list.length<2){
+        get_row_by_val('podat_user', 'aid', aid, 'get_inspect_notes_selector');
+    }else{
+        //consol e.log('insp_common_html_list REZ: ', insp_common_html_list);
+        build_inspect_notes_selector();
+    }
 	
 	get_row_by_val('podat_inspections', 'gid', igid, 'fill_with_inspection');
 	
@@ -4825,7 +4932,7 @@ function fill_with_inspection(rz){
     
     v_isp_data = {};
     use_isp_data = {};
-    console.log('fill_with_inspection', rz);//, last_inspect_rs
+    //consol e.log('fill_with_inspection', rz);//, last_inspect_rs
 	if(rz==-1){
 		///create and prefil the inspection with existing!
         //
@@ -4868,7 +4975,7 @@ function fill_with_inspection(rz){
     
     //$('#isp_score').val(last_inspect_rs['isp_score']).change();
     //$('#isp_waste').val(last_inspect_rs['isp_waste']).change();
-    console.log('use_isp_data ', use_isp_data);
+
     
     
     if($("#the_harvest_date").val().length==10){
@@ -4883,12 +4990,14 @@ function fill_with_inspection(rz){
 
 
 $(document).on('click','#load_prev_insp_vals',function(){ 
+    $("#allowflysave").val('0');
      fill_the_inspection_record();
 });
 
 
 function fill_the_inspection_record(){	
-    console.log('load use_isp_data', use_isp_data);
+    
+    //consol e.log('load use_isp_data', use_isp_data);
     
     $.each(use_isp_data, function(idx, itm) {
 
@@ -4904,7 +5013,7 @@ function fill_the_inspection_record(){
            $('#inspect_warn').show();
         }
     }); 
-    
+    $("#allowflysave").val('1');
     $("#load_prev_insp_vals_div").hide();
 }
 
@@ -4915,20 +5024,22 @@ $(document).on('change','#inspect_form select, #inspect_form input, #inspect_for
 
     //["merc_id", "myuid", "gid", "isp_date", "isp_ data", "synckey"];
 
-	if($("#allowflysave").val()=='1'){
+	if($("#allowflysave").val()=='1' && igid>0){
 		this_field = $(this).attr('id');
 		this_val = $(this).val();
+        has_cls = $(this).hasClass("inote_input_cls");
         
         
-        
-		if(this_field=='notexdate' || this_field=='notepdesc' || this_field=='notestate' || this_field=='myuid'){
+		if(has_cls || this_field=='notexdate' || this_field=='notepdesc' || this_field=='notestate' || this_field=='myuid'){
 			//exclude the plan fields!! ffs
             //consol e.log('fly 2',this_field);
 		}else{
             //aler_t('this_field '+this_field+' / this_val '+this_val);
 
             if(this_field=='isp_comments' || this_field=='isp_date' || this_field=='rec_cust_list'){
+                //consol e.log('cc1: ',this_val);
                 this_val = clean_quotes(this_val);
+                //consol e.log('cc2: ',this_val);
                 //this_val = "'"+this_val+"'";			
             }else{
                 this_val = parseFloat(this_val);
@@ -4941,9 +5052,11 @@ $(document).on('change','#inspect_form select, #inspect_form input, #inspect_for
             
             
             use_isp_data[this_field] = this_val;
-            //consol e.log('use_isp_data UPDATE', use_isp_data, this_field, this_val);
-            
             //set the new value
+            
+            console.log('podat_inspection save:', igid, 'isp_data', use_isp_data);
+            
+            
             set_val_by_('podat_inspections', igid, 'isp_data', use_isp_data);
             
             
@@ -4961,6 +5074,73 @@ $(document).on('change','#inspect_form select, #inspect_form input, #inspect_for
 
 
 });
+
+
+var theINitem = '';
+/*
+$(document).on('keydown', function(e){
+    //consol e.log(e.which);//metaKey
+    consol e.log(e);//metaKey
+    $('#keyxxx').val(e.key); 
+    <input type="text" value="X" style="color: #ff0000; width: 40px;" id="keyxxx">
+});*/
+
+$(document).on('keydown','.inote_input_clsxxx',function(e){
+    //53 is the number next buttn... maybe!
+    // || e.which == 53
+    if(e.which == 13 || e.which == 9) {
+        theINitem = $(this);
+        ins_changeme_go_action();
+    }else{
+        theINitem = '';
+    }    
+}); 
+
+$(document).on('blur','.inote_gosavexxx',function(e){
+
+        theINitem = $(this);
+        ins_changeme_go_action();
+        
+}); 
+var touchnow = false;
+$(document).on('click','.ins_changeme_go',function(){ 
+    if(!touchnow){
+        touchnow = true;
+        theINitem = $(this);
+        ins_changeme_go_action();
+    }
+}); 
+
+function ins_changeme_go_action(){
+    parent_targ = theINitem.parent().data('innrow');
+    
+    form_val = $('#cnx_'+parent_targ).val();
+    p1 = $('#cnx_'+parent_targ).data('p1');
+    p2 = $('#cnx_'+parent_targ).data('p2');
+    if(p1=='Tuber size:'){
+        form_val += ' > '+$('#cnx_6b').val();   
+    }
+    
+    
+    
+    if(form_val.trim()!=''){
+        isp_comments = $('#isp_comments').val();
+        newrow = p1+' '+form_val+''+p2;
+        if(isp_comments!=''){
+            endsetval = isp_comments+" | "+newrow;   
+        }else{
+            endsetval = newrow; 
+        }
+        $('#cdiv_'+parent_targ).fadeOut();
+        $('#isp_comments').val(endsetval).change();
+        //consol e.log(parent_targ, form_val, p1, p2);   
+    }
+    //consol e.log('isp coms now: ', $('#isp_comments').val());
+    touchnow = false;
+}
+
+
+
 
 
 
@@ -5134,7 +5314,7 @@ function clear_dig_form(){
 	$("#td_disease").val('');
 	$("#td_pest").val('');
 	$("#td_coments").val('');
-	$("#confirm_crop").val('');
+
 	$("#td_date").val('');
 
 	for(dg=1; dg<5; dg++){
@@ -5274,7 +5454,7 @@ $(document).on('change','#test_dig_form input, #test_dig_form textarea, #test_di
 		this_field = $(this).attr('id');
 		this_val = $(this).val();		
 		
-			if(this_field!='confirm_crop'){
+			//if(this_field!='confirm_ crop'){
                     
 					if(this_field=='td_disease' || this_field=='td_pest' || this_field=='td_coments' || this_field=='td_date'){
 						this_val = clean_quotes(this_val);		
@@ -5331,7 +5511,7 @@ $(document).on('change','#test_dig_form input, #test_dig_form textarea, #test_di
 
 
 
-			}///exclude confirm_crop
+			//}///exclude confirm_ crop
 	}
 });
 
@@ -5346,16 +5526,19 @@ $(document).on('change','#test_dig_form input, #test_dig_form textarea, #test_di
 
 function save_and_complete_testdig(){
 	if (confirm('Are you sure you want to save and complete? This will end this Test Dig, and sync with DIG when possible.')) {
-		if($("#confirm_crop").val()==$("#dig_cropshouldbe").val()){		
-			randstr = rand_str(24);
-			set_val_by_('podat_testdigs', igid, 'dig_myuid', randstr);
-			window.history.back();
+        randstr = rand_str(24);
+        set_val_by_('podat_testdigs', igid, 'dig_myuid', randstr);
+        window.history.back();
+        /*
+        if($("#confirm_ crop").val()==$("#dig_cropshouldbe").val()){		
+			
 			//aler_t(randstr);
 			//$("#dig_myuid").val(randstr);
 			//db.transaction(function(tx){tx.executeSql("UPDATE podat_testdigs SET dig_myuid='"+randstr+"' WHERE gid="+this_  gid+" AND dig_myuid='ACTIVE' AND synckey='"+userkey+"'",[],sac_testdig_done,errorHandler);},errorHandler,successCallBack);
 		}else{
 			alert('Please confirm the correct Crop Number. This looks incorrect.');
-		}
+		}*/
+        
 	}else{
 		//aler_t('Continuing Test DIg');
 	}
@@ -5395,6 +5578,8 @@ function load_box_count(){
             $('#bx_tubs_new').val('0');
             $('#bx_tubs_newb').val('0');
         
+            $('#bx_type_new').val('0').change();
+            $('#bx_type_newb').val('0').change();
         
         
 			if(!isNaN(igid) && igid>0){
@@ -5470,7 +5655,7 @@ function get_box_count_splits(){
 		$.ajax({type: "POST", dataType: "json", crossDomain: true, cache: false, data:{"pod":userkey, "cc":$("#igid").val(), "x": "_33s&$*$%ND673nsn%"}, url: mobSysURL+"dig_mobxxx/db_get_bx_splits.php", success: function(data){
 			rz = data.rez;
 			$("#submit_splits").show();
-			//consol e.log('db_get_bx_splits',rz);
+			console.log('db_get_ bx_splits',rz);
 
 		
 			if(rz.length>0 && rz[0]!='0'){
@@ -5481,6 +5666,7 @@ function get_box_count_splits(){
                     }else{
                         $("#Harvest_Box_Count").show();
                         $(".gradeinventbits").hide();
+                        console.log('hide invent!');
                     }
                 
 					maxn = $("#current_bc").html();
@@ -5504,10 +5690,10 @@ function get_box_count_splits(){
 						s2 = this_bsp['bx_size_2'];
 						stt = this_bsp['bx_total'];
                         stub = this_bsp['tp50kg'];
-                        bx_brk_type = this_bsp['bx_brk_type'];
+                        bxbrk_type = this_bsp['bx_brk_type'];
                         bx_note = this_bsp['bx_note'];
                         
-                        
+                        zx = z+'x';
                         
                         
 						
@@ -5515,6 +5701,7 @@ function get_box_count_splits(){
 						if(s1==0){
 							boxnote_var = 'boxnote_0';
 							split_var = 'bx_size_0';
+                            split_type_var = '';
                             split_bits = '0';
                             tubs_var = 'bx_tub_0';
 							split_tit = 'As Dug';
@@ -5522,28 +5709,52 @@ function get_box_count_splits(){
                             
                             split_tit = s1+'x'+s2;
                             split_var = 'bxsizeup_'+s1+'_'+s2;
+                            split_type_var = 'bxsizetype_'+s1+'_'+s2;
                             tubs_var = 'bxtubsup_'+s1+'_'+s2;
                             boxnote_var = 'boxnote_'+s1+'_'+s2; 
                             split_bits = s1+'_'+s2;
                             
-                            if(bx_brk_type==1){
-                                stt = -Math.abs(stt);
+                            if(bxbrk_type==1){
                                 split_tit=split_tit+' <span class="white">[Plant-back]</span>';
+                            }else if(bxbrk_type==2){
+                                 split_tit=split_tit+' <span class="white">[Stock Feed]</span>';    
+                            }else if(bxbrk_type==3){
+                                 split_tit=split_tit+' <span class="white">[Dumped]</span>';    
                             }
-                            
-							
 						}
                         
                         
-                        thistr ="<tr><td class='pt-0'><h2 class='mb-0 pt-2 pb-0 peagreen'>"+split_tit+": Tns</h2></td><td class='pt-0'><h2 class='mb-0 pt-2 pb-0 peagreen'>Tubs/50kg</h2></td></tr>";
-
+                        
+                        if(split_var=='bx_size_0'){
+                            //hide from AsDug
+                            thistr ="<tr><td class='pt-0'><h2 class='mb-0 pt-2 pb-0 peagreen'>"+split_tit+" Tns</h2></td><td class='pt-0'></td></tr>";
+                        }else{
+                            thistr ="<tr><td class='pt-0'><h2 class='mb-0 pt-2 pb-0 peagreen'>"+split_tit+": Tns</h2></td><td class='pt-0'><h2 class='mb-0 pt-2 pb-0 peagreen'>Tubs/50kg</h2></td></tr>";  
+                        }    
 						
-                        thistr +="<tr><td class='pt-0'><input type='number' min='-200' max='"+maxn+"' step='0.005' name='"+split_var+"' id='"+split_var+"' data-bits='"+split_bits+"' value='"+stt+"' autocomplete='dasdz423423'></td>";
-                        thistr +="<td class='pt-0'><input type='number' min='0' max='5000' step='1' name='"+tubs_var+"' id='"+tubs_var+"' value='"+stub+"' autocomplete='dasdz423423'></td></tr>";
                         
-                        thistr +="<tr><td class='pt-0 pl-0' colspan='2'><input type='text' name='"+boxnote_var+"' id='"+boxnote_var+"' value='"+bx_note+"' placeholder='Comments' autocomplete='dasdz423423' style='width: 100%; background:#6f6f64; color:#92db76;'></td></tr>";
+                        if(split_var=='bx_size_0'){
+                            //hide from AsDug
+                            thistr +="<tr><td class='pt-0'><input type='number' min='0' max='"+maxn+"' step='0.005' name='"+split_var+"' id='"+split_var+"' value='"+stt+"' autocomplete='dasdz423423'></td>";
+                            thistr +="<td class='pt-0'><input type='hidden' name='"+tubs_var+"' id='"+tubs_var+"' value='"+stub+"'></td>";
+                        }else{
+                            thistr +="<tr><td class='pt-0'><input type='number' min='0' max='"+maxn+"' step='0.005' name='"+split_var+"' id='"+split_var+"_"+zx+"' data-bits='"+split_bits+"_"+zx+"' data-killbits='_"+zx+"' value='"+stt+"' autocomplete='dasdz423423'></td>";
+                            thistr +="<td class='pt-0'><input type='number' min='0' max='5000' step='1' name='"+tubs_var+"' id='"+tubs_var+"_"+zx+"' value='"+stub+"' autocomplete='dasdz423423'></td>";   
+                        }
+                        thistr +="</tr>";
+                        if(s1>0){
+                            thistr +="<tr><td class='pt-0 pl-0' colspan='2'><select name='"+split_type_var+"' id='"+split_type_var+"_"+zx+"'><option value='0'"+(bxbrk_type==0?' selected':'')+">Split</option><option value='1'"+(bxbrk_type==1?' selected':'')+">P/back</option><option value='2'"+(bxbrk_type==2?' selected':'')+">S/Feed</option><option value='3'"+(bxbrk_type==3?' selected':'')+">Dump</option></select></td></tr>";
+                        }
+                        
+                        if(split_var=='bx_size_0'){
+                            //AD!
+                            thistr +="<tr><td class='pt-0 pl-0' colspan='2'><input type='text' name='"+boxnote_var+"' id='"+boxnote_var+"' value='"+bx_note+"' placeholder='Comments' autocomplete='dasdz423423' style='width: 100%; background:#bbbb99; color:#5a5a4f;'></td></tr>";
+                        }else{
+                            thistr +="<tr><td class='pt-0 pl-0' colspan='2'><input type='text' name='"+boxnote_var+"' id='"+boxnote_var+"_"+zx+"' value='"+bx_note+"' placeholder='Comments' autocomplete='dasdz423423' style='width: 100%; background:#bbbb99; color:#5a5a4f;'></td></tr>";   
+                        }
                         
                         
+                        thistr +="<tr><td class='pt-0 pl-0' colspan='2'><br></td></tr>";
                         
                         $('#split_table').append(thistr);
 						//process_dress_row_now(thiscrid, z, rz.length);						
@@ -5552,6 +5763,10 @@ function get_box_count_splits(){
 
 			}else{			
 
+                    $("#Harvest_Box_Count").show();
+                    $(".gradeinventbits").hide();
+                    console.log('hide invent!');
+                   
 			}
 
 		},error: function(XMLHttpRequest, textStatus, errorThrown) {ajaxerror('Splits Error');}
@@ -5624,11 +5839,11 @@ function save_and_complete_box_splits(){
 		send_var = '';
 
         if(!isNaN($("#bx_size_new").val()) && $("#new_siz_1").val()<$("#new_siz_2").val() && $("#bx_size_new").val()!=0){
-            send_var = 'NEW:'+$("#new_siz_1").val()+'x'+$("#new_siz_2").val()+':'+$("#bx_size_new").val()+':'+$("#bx_note_new").val()+':'+$("#bx_tubs_new").val()+'|';
+            send_var = 'NEW:'+$("#new_siz_1").val()+'x'+$("#new_siz_2").val()+':'+$("#bx_size_new").val()+':'+$("#bx_note_new").val()+':'+$("#bx_tubs_new").val()+':'+$("#bx_type_new").val()+'|';
             nex_bx_tot += parseFloat($("#bx_size_new").val());
         }
         if(!isNaN($("#bx_size_newb").val()) && $("#new_siz_1b").val()<$("#new_siz_2b").val() && $("#bx_size_newb").val()!=0){
-            send_var += 'NEW:'+$("#new_siz_1b").val()+'x'+$("#new_siz_2b").val()+':'+$("#bx_size_newb").val()+':'+$("#bx_note_newb").val()+':'+$("#bx_tubs_newb").val()+'|';
+            send_var += 'NEW:'+$("#new_siz_1b").val()+'x'+$("#new_siz_2b").val()+':'+$("#bx_size_newb").val()+':'+$("#bx_note_newb").val()+':'+$("#bx_tubs_newb").val()+':'+$("#bx_type_newb").val()+'|';
             nex_bx_tot += parseFloat($("#bx_size_newb").val());
         }
 
@@ -5646,9 +5861,9 @@ function save_and_complete_box_splits(){
             
 			if(fnom.includes('bxsizeup_')){
                 idbits = $(this).data("bits");
-                
-                ///get the note!
-                //consol e.log('split_table',fnom, fval, 'bits: ',idbits);
+                kill_bit = $(this).data("killbits");
+                //remove fnom //killbits
+                fnom = fnom.replace(kill_bit, "");
                 ///////////////
                 tbval = 0;
 
@@ -5661,8 +5876,20 @@ function save_and_complete_box_splits(){
                 if($('#boxnote_'+idbits)){
                     nttval = $('#boxnote_'+idbits).val();
                 }
+                
+                bttype = 0;
+                //split_type_var = 'bxsizetype_'+s1+'_'+s2;
+                if($('#bxsizetype_'+idbits)){
+                    bttype = $('#bxsizetype_'+idbits).val();
+                }
+                
            
-                send_var += fnom+':'+fval+':'+nttval+':'+tbval+'|';
+                send_var += fnom+':'+fval+':'+nttval+':'+tbval+':'+bttype+'|';
+                
+                ///get the note!
+                console.log('split_table row', fnom, fval, 'bits: ',idbits);
+                //console.log('send_var: ', send_var);
+                
                 
                 if(fval>0){nex_bx_tot += parseFloat(fval);}
             }
@@ -5671,8 +5898,10 @@ function save_and_complete_box_splits(){
 		send_var += 'end'; 
     
     
-        //consol e.log(send_var);
+        console.log('SEND VAR: ',send_var);
     
+    
+        /**/
         $("#current_bc").html(nex_bx_tot);//
         $("#bx_txt").html(nex_bx_tot);
         $("#cd_BoxCount").html(nex_bx_tot);
@@ -5690,7 +5919,7 @@ function save_and_complete_box_splits(){
 		}else{
 			alert('Saved, but no connection. Remember to sync later.');
 		}
-	
+	   
 		
 		
 	//}
@@ -5936,7 +6165,7 @@ $(document).on('change','#dress_form input, #dress_form select, #dress_form text
 			tonsandtubs[3].tubs = this_val;
 
             
-            console.log('tonsandtubs',tonsandtubs);
+            //consol e.log('tonsandtubs',tonsandtubs);
             
             this_field = 'tons_and_tubs';
             this_val = tonsandtubs;
@@ -6706,7 +6935,7 @@ function go_syncgo(){
 	
 
 	//do this will there are no sync photos left
-    setTimeout(do_the_data_sync, 500);
+    setTimeout(do_the_data_sync, 1000);
 
 	
 }
